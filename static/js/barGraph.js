@@ -63,7 +63,7 @@ function createButton(projectID){
     idButton.value = 0;
     idButton.addEventListener('click',function(){
         sessionStorage.setItem('projectID', projectID);
-        window.location.href = "monitor";
+        window.location.href = "monitor.js";
     });
 
     var prevButton = document.createElement('button');

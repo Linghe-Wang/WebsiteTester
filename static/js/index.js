@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // match = await postWriterText({state: "adminlogin", username: usernameInput, password: passwordInput});
             if (match == 300){
                 sessionStorage.setItem('serverURL', serverURL);
-                window.location.href = "bargraph";
+                window.location.href = "barGraph.html";
             }
             else if (match == 100){
                 showError(submit, "Incorrect username/password, please try again");
