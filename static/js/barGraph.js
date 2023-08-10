@@ -63,7 +63,7 @@ function createButton(projectID){
     idButton.value = 0;
     idButton.addEventListener('click',function(){
         sessionStorage.setItem('projectID', projectID);
-        window.location.href = "monitor.js";
+        window.location.href = "monitor.html";
     });
 
     var prevButton = document.createElement('button');
@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const divider2 = document.getElementById('divider2');
 
     button.addEventListener('click', function(){
-        window.location.href = "monitor";
+        window.location.href = "monitor.html";
     })
 
     const heightOffset = head.offsetHeight + divider1.offsetHeight + button.offsetHeight + divider2.offsetHeight;
