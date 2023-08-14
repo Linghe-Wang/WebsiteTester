@@ -44,32 +44,32 @@ document.addEventListener('DOMContentLoaded', function () {
         submit.innerHTML = `<i class="fa fa-spinner fa-spin" id="spinner" style="font-size: 23px;"></i>`
         submit.style.padding = "6px";
         submit.disabled = true;
-//        var usernameInput = username.value;
-//        var passwordInput = password.value;
-//        var urlInput = url.value;
-//        if (usernameInput == "" || passwordInput == "" || urlInput == ""){
-//            showError(submit, "All the fields should be filled out, please try again");
-//        }
-//        else {
-//            serverURL = urlInput.replaceAll(' ','');
-//            var handshake_message = await checkServerUrl();
-//            if (handshake_message === "You Got it!"){
-//                match = await postWriterText({state: "adminlogin", username: usernameInput, password: passwordInput});
-//                if (match == 300){
-//                    sessionStorage.setItem('serverURL', serverURL);
-//                    window.location.href = "barGraph.html";
-//                }
-//                else if (match == 100){
-//                    showError(submit, "Incorrect username/password, please try again");
-//                }
-//                else if(match == 400){
-//                    showError(submit, "Sever error encountered, please try again");
-//                }
-//            }
-//            else{
-//                showError(submit, "Wrong server URL/no internet, please try again");
-//            }
-//        }
+        var usernameInput = username.value;
+        var passwordInput = password.value;
+        var urlInput = url.value;
+        if (usernameInput == "" || passwordInput == "" || urlInput == ""){
+            showError(submit, "All the fields should be filled out, please try again");
+        }
+        else {
+            serverURL = urlInput.replaceAll(' ','');
+            var handshake_message = await checkServerUrl();
+            if (handshake_message === "You Got it!"){
+                match = await postWriterText({state: "adminlogin", username: usernameInput, password: passwordInput});
+                if (match == 300){
+                    sessionStorage.setItem('serverURL', serverURL);
+                    window.location.href = "barGraph.html";
+                }
+                else if (match == 100){
+                    showError(submit, "Incorrect username/password, please try again");
+                }
+                else if(match == 400){
+                    showError(submit, "Sever error encountered, please try again");
+                }
+            }
+            else{
+                showError(submit, "Wrong server URL/no internet, please try again");
+            }
+        }
         sessionStorage.setItem('serverURL', serverURL);
         window.location.href = "barGraph.html";
         submit.removeAttribute("disabled");;
