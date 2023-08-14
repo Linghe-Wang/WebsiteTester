@@ -15,7 +15,7 @@ let chartHeight;
 let idButton;
 let serverURL;
 let project_dict;
-
+let loader;
 // Chart configuration options
 const options = {
     scales: {
@@ -117,10 +117,9 @@ function createChart(projectID){
 }
 
 document.addEventListener('DOMContentLoaded', async function () {
-    serverURL = sessionStorage.getItem('serverURL');
-    console.log("here1")
-    console.log(serverURL); // Outputs: John
-    console.log("here2");
+//    serverURL = sessionStorage.getItem('serverURL');
+    serverURL = "http://127.0.0.1:5100/";
+    console.log(serverURL);
     sessionStorage.setItem('projectID', "");
 
     windowWidth = window.innerWidth;
@@ -130,6 +129,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const divider1 = document.getElementById('divider1');
     const button = document.getElementById('goto');
     const divider2 = document.getElementById('divider2');
+    const spinner = document.getElementById('spinner');
 
     button.addEventListener('click', function(){
         window.location.href = "monitor.html";
@@ -137,32 +137,26 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     const heightOffset = head.offsetHeight + divider1.offsetHeight + button.offsetHeight + divider2.offsetHeight;
     chartHeight = ((windowHeight - heightOffset)/5);
+    console.log(head.offsetHeight, divider1.offsetHeight, button.offsetHeight, divider2.offsetHeight);
 
     projectChart = document.createElement('div');
     projectChart.className = "project-chart";
 
     project_dict = await retrieveProject();
+    document.body.removeChild(spinner);
     console.log(project_dict);
     for(var id in project_dict){
         var this_project = project_dict[id]
         createButton(id);
         createChart(id);
     }
-
 });
 
 
 async function retrieveProject() {
-  const object = {message: "Please give me list of projects"}
   try {
        const response = await fetch(serverURL + "/list", {
-          // mode: 'no-cors',
-          headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-          },
-          method: 'POST',
-          body: JSON.stringify(object),
+          method: 'GET',
        });
       const message = await response.json();
       console.log(message);
@@ -171,5 +165,6 @@ async function retrieveProject() {
   catch (err){
       console.log(err);
       console.log('failed to fetch');
+      return "failed";
   }
 };
