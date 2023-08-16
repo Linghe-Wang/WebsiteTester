@@ -1,13 +1,3 @@
-dates = ["Aug 1", "Aug 2", "Aug 3", "Aug 4", "Aug 5", "Aug 6", "Aug 7", "Aug 8", "Aug 9", "Aug 10",
-    "Aug 11", "Aug 12", "Aug 13", "Aug 14", "Aug 15", "Aug 16", "Aug 17", "Aug 18", "Aug 19", "Aug 20",
-    "Aug 21", "Aug 22", "Aug 23", "Aug 24", "Aug 25", "Aug 26", "Aug 27", "Aug 28", "Aug 29", "Aug 30",
-    "Aug 31", "Sep 1", "Sep 2", "Sep 3", "Sep 4", "Sep 5", "Sep 6", "Sep 7", "Sep 8", "Sep 9", "Sep 10",
-    "Sep 11", "Sep 12", "Sep 13", "Sep 14", "Sep 15", "Sep 16", "Sep 17", "Sep 18", "Sep 19", "Sep 20",
-    "Sep 21", "Sep 22", "Sep 23", "Sep 24", "Sep 25", "Sep 26", "Sep 27", "Sep 28", "Sep 29", "Sep 30",
-    "Oct 1"];
- data = [11,12,9,15,20,9,7,8,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
- console.log(dates.length);
- console.log(data.length);
 let windowWidth;
 let windowHeight;
 let projectChart;
@@ -117,8 +107,7 @@ function createChart(projectID){
 }
 
 document.addEventListener('DOMContentLoaded', async function () {
-//    serverURL = sessionStorage.getItem('serverURL');
-    serverURL = "http://127.0.0.1:5100/";
+    serverURL = sessionStorage.getItem('serverURL');
     console.log(serverURL);
     sessionStorage.setItem('projectID', "");
 
@@ -156,7 +145,12 @@ document.addEventListener('DOMContentLoaded', async function () {
 async function retrieveProject() {
   try {
        const response = await fetch(serverURL + "/list", {
-          method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            method: 'POST',
+            body: JSON.stringify({message: "Give me project overview"}),
        });
       const message = await response.json();
       console.log(message);

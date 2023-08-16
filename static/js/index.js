@@ -70,8 +70,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 showError(submit, "Wrong server URL/no internet, please try again");
             }
         }
-        sessionStorage.setItem('serverURL', serverURL);
-        window.location.href = "barGraph.html";
         submit.removeAttribute("disabled");;
         document.getElementById('spinner').parentNode.removeChild(document.getElementById('spinner'));
         submit.textContent = "Login";
@@ -114,9 +112,14 @@ async function checkServerUrl() {
         const controller = new AbortController();
         const id = setTimeout(() => controller.abort(), 8000)
         const response = await fetch(serverURL + "/handshake", {
-            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            method: 'POST',
+            body: JSON.stringify({message: "Am I accessing the correct server?"}),
             signal: controller.signal
-        })
+        });
         clearTimeout(id);
         const message = await response.json();
         console.log(message);
