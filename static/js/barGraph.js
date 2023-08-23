@@ -128,13 +128,12 @@ document.addEventListener('DOMContentLoaded', async function () {
     chartHeight = ((windowHeight - heightOffset)/5);
     console.log(head.offsetHeight, divider1.offsetHeight, button.offsetHeight, divider2.offsetHeight);
 
-    projectChart = document.createElement('div');
-    projectChart.className = "project-chart";
-
     project_dict = await retrieveProject();
     document.body.removeChild(spinner);
     console.log(project_dict);
     for(var id in project_dict){
+        projectChart = document.createElement('div');
+        projectChart.className = "project-chart";
         var this_project = project_dict[id]
         createButton(id);
         createChart(id);
