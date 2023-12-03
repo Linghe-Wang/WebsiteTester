@@ -7,23 +7,28 @@ let diff_htmls = null;
 let projectIndex = 0;
 let slider = null;
 let contentDisplay = null;
-var info;
+let events= [];
+let min = 0;
+let max = 0;
+var info = [];
 
 document.addEventListener('DOMContentLoaded', function() {
     serverURL = sessionStorage.getItem('serverURL');
     var temp = sessionStorage.getItem('projectID');
+    var writer_action_idx = sessionStorage.getItem('writer_action_idx');
     if (temp !== ""){
         console.log(temp);
         document.getElementById("projectID").value = temp;
+        document.getElementById("writer_action_idx").value = writer_action_idx;
         retrieveProject();
     }
-    slider = document.getElementById("player");
+    // slider = document.getElementById("player");
     contentDisplay = document.getElementById("displayContent");
-    slider.addEventListener("input", event => {
-        var idx = event.target.value;
-        // contentDisplay.textContent = content[idx][2];
-        contentDisplay.innerHTML = diff_htmls[projectIndex][idx]
-    });
+    // slider.addEventListener("input", event => {
+    //     var idx = event.target.value;
+    //     // contentDisplay.textContent = content[idx][2];
+    //     contentDisplay.innerHTML = diff_htmls[projectIndex][idx]
+    // });
 });
 
 function addButtons(){
@@ -50,7 +55,12 @@ function addButtons(){
 
 async function retrieveProject() {
   var text = document.getElementById("projectID").value;
-  const object = {projectID: text};
+  var writer_action_idx = document.getElementById("writer_action_idx").value;
+  var writer_action_offset = 50;
+  if (0 < min && min < 50){
+    writer_action_offset = min
+  }
+  const object = {projectID: text, writer_action_idx: parseInt(writer_action_idx), writer_action_offset: writer_action_offset};
   try {
        const response = await fetch(serverURL + "/create", {
           // mode: 'no-cors',
@@ -73,13 +83,36 @@ async function retrieveProject() {
           contentDisplay.innerHTML = message.info[0]['htmls']
           // addButtons();
       }
-      info = message.info
-      for (let i = 0; i < info.length; i++) {
-        console.log(info[i]['actions'])
-        description = "file: " + info[i]['actions']['file'] + "\n" + 
-                      "timestamp: " + info[i]['actions']['timestamp']
-        events.push({user: info[i]['users'], description: description})
+      var temp_info = message.info
+      var temp_min = message.min
+      var temp_max = message.max
+      var temp_events = []
+
+      for (let i = 0; i < temp_info.length; i++) {
+        console.log(temp_info[i]['actions'])
+        description = "file: " + temp_info[i]['actions']['file'] + "\n" + 
+                      "timestamp: " + temp_info[i]['actions']['timestamp']
+        temp_events.push({user: temp_info[i]['users'], description: description})
       }
+
+      if (temp_max == min){
+        events = temp_events.concat(events);
+        info = temp_info.concat(info);
+        min = temp_min;
+        currentIndex = Math.ceil(temp_events.length / eventsPerPage);
+      }
+      else if (temp_min == max){
+        events = events.concat(temp_events);
+        info = info.concat(temp_info);
+        max = temp_max;
+      }
+      else{
+        events = temp_events;
+        info = temp_info;
+        min = temp_min;
+        max = temp_max;
+      }
+
       loadEvents(true);
       // Automatically click the first event
       $('.timeline__event-indicator').eq(0).click();
@@ -96,13 +129,12 @@ async function retrieveProject() {
     var eventsPerPage = 4;
     var currentIndex = 0;
     var globalIndex = 0;
-    var events = []
-    var globalIndex = 0;
-  
+    var currentIndex;
+
     // Load events dynamically based on the project ID
     // loadEvents(projectId, true);
   
-    function loadEvents(clickFirstEvent) {
+    async function loadEvents(clickFirstEvent) {
       // Replace this code with your logic to fetch events based on the project ID
       // Here, we assume that you have an array of events with their respective years and descriptions
       // Modify this array to match the events you want to display  
@@ -112,9 +144,21 @@ async function retrieveProject() {
       timelineEvents.empty();
   
       // Calculate the start and end indexes based on the current page
+      // var startIndex = currentIndex * eventsPerPage;
       var startIndex = currentIndex * eventsPerPage;
       var endIndex = startIndex + eventsPerPage;
-  
+      
+      if (startIndex < 0 && min !=0){
+        document.getElementById("writer_action_idx").value = Math.max(min - 50, 0);
+        await retrieveProject();
+        return;
+      }
+      else if (endIndex >= (events.length - 1)){
+        document.getElementById("writer_action_idx").value = max;
+        await retrieveProject();
+        return;
+      }
+
       // Create event elements dynamically
       for (var i = startIndex; i < endIndex && i < events.length; i++) {
         var event = events[i];
@@ -145,7 +189,7 @@ async function retrieveProject() {
       var timelinePagerPrev = $('.timeline-pager__previous');
       var timelinePagerNext = $('.timeline-pager__next');
   
-      if (currentIndex === 0) {
+      if (min === 0 && currentIndex === 0) {
         timelinePagerPrev.hide();
       } else {
         timelinePagerPrev.show();
@@ -221,7 +265,7 @@ async function retrieveProject() {
         }
     });
 
-    function navigateToPreviousEvent() {
+    async function navigateToPreviousEvent() {
       var prevEvent = $('.timeline__event.is-active').prev('.timeline__event');
       if (prevEvent.length > 0) {
         prevEvent.find('.timeline__event-indicator').click();
@@ -233,10 +277,10 @@ async function retrieveProject() {
           $('.timeline__event-indicator').last().click();
         } else {
           currentIndex--;
-          if (currentIndex < 0) {
+          if (currentIndex < 0 && min ==0) {
             currentIndex = 0;
           } else {
-            loadEvents(projectId);
+            await loadEvents(projectId);
             $('.timeline__event-indicator').last().click();
           }
         }

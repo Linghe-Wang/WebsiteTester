@@ -18,26 +18,27 @@ const options = {
 
 function prevChart(event){
     var currentPos = Number(event.target.parentNode.childNodes[0].value);
+    var pid = event.target.parentNode.childNodes[0].innerText;
     if (currentPos >= 15){
         event.target.parentNode.childNodes[0].value = currentPos - 15;
         var canvas = event.target.parentNode.nextSibling.childNodes[0].getContext('2d');
         const chartInstance = Chart.getChart(canvas);
-        chartInstance.data.labels = dates.slice(currentPos-15, currentPos);
-        chartInstance.data.datasets[0].data = data.slice(currentPos-15, currentPos);
+        chartInstance.data.labels = project_dict[pid][1].slice(currentPos-15, currentPos);
+        chartInstance.data.datasets[0].data = project_dict[pid][2].slice(currentPos-15, currentPos);
         chartInstance.update();
     }
 }
 
 function nextChart(event){
      var currentPos = Number(event.target.parentNode.childNodes[0].value);
-     var pid = event.target.parentNode.childNodes[0].value.textContent;
-     var length = project_dict[pid][0].length;
+     var pid = event.target.parentNode.childNodes[0].innerText;
+     var length = project_dict[pid][1].length;
      if (currentPos < (length - 15)){
         event.target.parentNode.childNodes[0].value = currentPos + 15;
         var canvas = event.target.parentNode.nextSibling.childNodes[0].getContext('2d');
         const chartInstance = Chart.getChart(canvas);
-        chartInstance.data.labels = project_dict[projectID][0].slice(currentPos+15, currentPos+30);
-        chartInstance.data.datasets[0].data = project_dict[projectID][1].slice(currentPos+15, currentPos+30);
+        chartInstance.data.labels = project_dict[pid][1].slice(currentPos+15, currentPos+30);
+        chartInstance.data.datasets[0].data = project_dict[pid][2].slice(currentPos+15, currentPos+30);
         chartInstance.update();
      }
 }
@@ -51,8 +52,10 @@ function createButton(projectID){
     idButton.innerText = projectID;
     idButton.style.height = section+"px";
     idButton.value = 0;
+    idButton.title = project_dict[projectID][0]
     idButton.addEventListener('click',function(){
         sessionStorage.setItem('projectID', projectID);
+        sessionStorage.setItem('writer_action_idx', 0);
         window.location.href = "monitor.html";
     });
 
@@ -91,10 +94,10 @@ function createChart(projectID){
     var canvas = document.getElementById(projectID).getContext('2d');
 
     const data1 = {
-        labels: project_dict[projectID][0].slice(0, 15),
+        labels: project_dict[projectID][1].slice(0, 15),
         datasets: [{
             label: 'Number of Edits',
-            data: project_dict[projectID][1].slice(0, 15),
+            data: project_dict[projectID][2].slice(0, 15),
             hoverBackgroundColor: 'rgb(93, 173, 226)'
         }]
     };
@@ -134,7 +137,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     for(var id in project_dict){
         projectChart = document.createElement('div');
         projectChart.className = "project-chart";
-        var this_project = project_dict[id]
         createButton(id);
         createChart(id);
     }
