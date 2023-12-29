@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Project Overview</title>
+</head>
+<body>
+    <nav class="nav-buttons">
+        <a href="/main">Overview</a>
+        <a href="/project">Project</a>
+        <a href="/user">User</a>
+    </nav>
+    <form action="/api/project" method="POST">
+        <select name="projectid" id="projectid">
+            {% for pid in all_pids %}
+                <option value="{{ pid }}">{{ pid }}</option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="Apply">
+    </form>
+</body>
+</html>
