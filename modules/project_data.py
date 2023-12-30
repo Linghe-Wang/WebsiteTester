@@ -1,18 +1,4 @@
-from pymongo import MongoClient
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
-from rich.console import Console
-
-console = Console()
-client = MongoClient('localhost', 27017)
-db = client.flask_db
-collection = db.activity
-
-# Maybe not needed for admin page.
-user_data = db["user_data"]
-project_IDs = db["project_IDs"]
-
-mili_a_day = 24 * 3600000
+from .utils import *
 
 
 def distinct_projects():
@@ -52,7 +38,7 @@ def project_edits_by_week(date, pid):
     start_time_seconds = int(dt.timestamp())
     start_time_seconds = start_time_seconds * 1000
 
-    edits_each_day = project_edits_by_days(start_time_seconds, 7)
+    edits_each_day = project_edits_by_days(start_time_seconds, 7, pid)
 
     offset_days = 7 * mili_a_day
     end_time_seconds = start_time_seconds + offset_days
@@ -98,7 +84,6 @@ def project_edits_by_days(start_time_seconds, count, pid):
     return edits_each_day
 
 
-# date: start date, string given from html form
 def project_edits_by_month(date, pid):
     result = {}
 
@@ -110,7 +95,7 @@ def project_edits_by_month(date, pid):
     start_time_seconds = int(dt.timestamp())
     end_time_seconds = int(month_later_dt.timestamp())
 
-    days_in_month = (start_time_seconds - end_time_seconds) / 24 * 3600
+    days_in_month = int((end_time_seconds - start_time_seconds) / (24 * 3600))
     start_time_seconds = start_time_seconds * 1000
     end_time_seconds = end_time_seconds * 1000
 
@@ -123,3 +108,61 @@ def project_edits_by_month(date, pid):
     console.log(result)
     return result
 
+
+def project_edits_each_month(date_obj, pid):
+    edits_each_month = {}
+
+    for i in range(12):
+        start_time_seconds = int(date_obj.timestamp()) * 1000
+        month_later_dt = date_obj + relativedelta(months=1)
+        end_time_seconds = int(month_later_dt.timestamp()) * 1000
+
+        documents = collection.count_documents(
+            {"project": pid, "timestamp": {"$gte": start_time_seconds, "$lt": end_time_seconds}})
+
+        pipeline = [
+            {"$match": {"project": pid, "timestamp": {"$gte": start_time_seconds, "$lt": end_time_seconds}}},
+            {"$group": {"_id": "$username", "count": {"$sum": 1}}},
+            {"$group": {
+                "_id": None,
+                "data": {"$push": {"k": {"$ifNull": ["$_id", "null"]},
+                                   "v": "$count"}}
+            }},
+            {"$replaceRoot": {"newRoot": {"$arrayToObject": "$data"}}}
+        ]
+
+        result = list(collection.aggregate(pipeline))
+        result.insert(0, documents)
+
+        start_time_seconds = start_time_seconds / 1000
+        start_obj = datetime.utcfromtimestamp(start_time_seconds)
+        start_string = start_obj.strftime('%Y-%m-%d')
+        edits_each_month[start_string] = result
+
+        date_obj = month_later_dt
+
+    return edits_each_month
+
+
+def project_edits_by_year(date, pid):
+    result = {}
+
+    time_string = date
+    date_time_format = "%Y-%m-%d"
+    dt = datetime.strptime(time_string, date_time_format)
+    year_later_dt = dt + relativedelta(years=1)
+
+    start_time_seconds = int(dt.timestamp())
+    end_time_seconds = int(year_later_dt.timestamp())
+
+    start_time_seconds = start_time_seconds * 1000
+    end_time_seconds = end_time_seconds * 1000
+
+    edits_each_month = project_edits_each_month(dt, pid)
+    users = find_user_progress(start_time_seconds, end_time_seconds, pid)
+
+    result["edits_each_month"] = edits_each_month
+    result["users"] = users
+
+    console.log(result)
+    return result

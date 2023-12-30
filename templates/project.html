@@ -16,7 +16,15 @@
                 <option value="{{ pid }}">{{ pid }}</option>
             {% endfor %}
         </select>
-        <input type="submit" value="Apply">
+        <input type="week" id="weekly" name="week" min="2023-W01" max={{ maxweek }}>
+        <input type="submit" name="interval" value="weekly">
+        <input type="month" id="monthly" name="month" min="2023-01" max={{ maxmonth }}>
+        <input type="submit" name="interval" value="monthly">
+        <select name="year" id="year">
+            <option value="2023-01-01">2023</option>
+            <option value="2024-01-01">2024</option>
+        </select>
+        <input type="submit" name="interval" value="annually">
     </form>
 </body>
 </html>

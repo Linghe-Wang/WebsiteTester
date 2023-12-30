@@ -1,18 +1,4 @@
-from pymongo import MongoClient
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
-from rich.console import Console
-
-console = Console()
-client = MongoClient('localhost', 27017)
-db = client.flask_db
-collection = db.activity
-
-# Maybe not needed for admin page.
-user_data = db["user_data"]
-project_IDs = db["project_IDs"]
-
-mili_a_day = 24 * 3600000
+from .utils import *
 
 
 def find_top_n_users(start, end, n):
@@ -57,7 +43,7 @@ def fetch_edits_by_week(date):
     start_time_seconds = int(dt.timestamp())
     start_time_seconds = start_time_seconds * 1000
 
-    edits_each_day = fetch_edits_by_days(start_time_seconds, 7)
+    edits_each_day = fetch_edits_each_day(start_time_seconds, 7)
 
     offset_days = 7 * mili_a_day
     end_time_seconds = start_time_seconds + offset_days
@@ -72,7 +58,7 @@ def fetch_edits_by_week(date):
     return result
 
 
-def fetch_edits_by_days(start_time_seconds, count):
+def fetch_edits_each_day(start_time_seconds, count):
     edits_each_day = {}
 
     for i in range(count):
@@ -105,6 +91,68 @@ def fetch_edits_by_days(start_time_seconds, count):
     return edits_each_day
 
 
+def fetch_edits_each_month(date_obj):
+    edits_each_month = {}
+
+    for i in range(12):
+        start_time_seconds = int(date_obj.timestamp()) * 1000
+        month_later_dt = date_obj + relativedelta(months=1)
+        end_time_seconds = int(month_later_dt.timestamp()) * 1000
+
+        documents = collection.count_documents(
+            {"timestamp": {"$gte": start_time_seconds, "$lt": end_time_seconds}})
+
+        pipeline = [
+            {"$match": {"timestamp": {"$gte": start_time_seconds, "$lt": end_time_seconds}}},
+            {"$group": {"_id": "$project", "count": {"$sum": 1}}},
+            {"$group": {
+                "_id": None,
+                "data": {"$push": {"k": {"$ifNull": ["$_id", "null"]},
+                                   "v": "$count"}}
+            }},
+            {"$replaceRoot": {"newRoot": {"$arrayToObject": "$data"}}}
+        ]
+
+        result = list(collection.aggregate(pipeline))
+        result.insert(0, documents)
+
+        start_time_seconds = start_time_seconds / 1000
+        start_obj = datetime.utcfromtimestamp(start_time_seconds)
+        start_string = start_obj.strftime('%Y-%m-%d')
+        edits_each_month[start_string] = result
+
+        date_obj = month_later_dt
+
+    return edits_each_month
+
+
+def fetch_edits_by_year(date):
+    result = {}
+
+    time_string = date
+    date_time_format = "%Y-%m-%d"
+    dt = datetime.strptime(time_string, date_time_format)
+    year_later_dt = dt + relativedelta(years=1)
+
+    start_time_seconds = int(dt.timestamp())
+    end_time_seconds = int(year_later_dt.timestamp())
+
+    start_time_seconds = start_time_seconds * 1000
+    end_time_seconds = end_time_seconds * 1000
+
+    edits_each_month = fetch_edits_each_month(dt)
+
+    top_n_users = find_top_n_users(start_time_seconds, end_time_seconds, 5)
+    top_n_projects = find_top_n_projects(start_time_seconds, end_time_seconds, 5)
+
+    result["edits_each_month"] = edits_each_month
+    result["top_n_users"] = top_n_users
+    result["top_n_projects"] = top_n_projects
+
+    console.log(result)
+    return result
+
+
 # date: start date, string given from html form
 def fetch_edits_by_month(date):
     result = {}
@@ -117,11 +165,11 @@ def fetch_edits_by_month(date):
     start_time_seconds = int(dt.timestamp())
     end_time_seconds = int(month_later_dt.timestamp())
 
-    days_in_month = (start_time_seconds - end_time_seconds) / 24 * 3600
+    days_in_month = int((end_time_seconds - start_time_seconds) / (24 * 3600))
     start_time_seconds = start_time_seconds * 1000
     end_time_seconds = end_time_seconds * 1000
 
-    edits_each_day = fetch_edits_by_days(start_time_seconds, days_in_month)
+    edits_each_day = fetch_edits_each_day(start_time_seconds, days_in_month)
 
     top_n_users = find_top_n_users(start_time_seconds, end_time_seconds, 5)
     top_n_projects = find_top_n_projects(start_time_seconds, end_time_seconds, 5)
@@ -130,7 +178,7 @@ def fetch_edits_by_month(date):
     result["top_n_users"] = top_n_users
     result["top_n_projects"] = top_n_projects
 
-    # console.log(result)
+    console.log(result)
     return result
 
 
