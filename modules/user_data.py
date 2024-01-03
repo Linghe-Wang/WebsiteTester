@@ -1,16 +1,17 @@
 from .utils import *
 
 
-def _find_user_progress(start, end, pid):
-    field_name = "username"
+def _find_project_progress(start, end, uid):
+    field_name = "project"
     pipeline = [
-        {"$match": {"project": pid, "timestamp": {"$gte": start, "$lt": end}}},
+        {"$match": {"username": uid, "timestamp": {"$gte": start, "$lt": end}}},
         {"$group": {"_id": f"${field_name}", "count": {"$sum": 1}}},
         {"$sort": {"count": -1}},
         {
             "$group": {
                 "_id": None,
-                "data": {"$push": {"k": "$_id", "v": "$count"}}
+                "data": {"$push": {"k": {"$ifNull": ["$_id", "null"]},
+                                    "v": "$count"}}
             }
         },
         {
@@ -25,18 +26,18 @@ def _find_user_progress(start, end, pid):
     return result
 
 
-def _project_edits_each_day(start_time_seconds, count, pid):
+def _user_edits_each_day(start_time_seconds, count, uid):
     edits_each_day = {}
 
     for i in range(count):
         offset_days = 1 * mili_a_day
         end_time_seconds = start_time_seconds + offset_days
         documents = collection.count_documents(
-            {"project": pid, "timestamp": {"$gte": start_time_seconds, "$lt": end_time_seconds}})
+            {"username": uid, "timestamp": {"$gte": start_time_seconds, "$lt": end_time_seconds}})
 
         pipeline = [
-            {"$match": {"project": pid, "timestamp": {"$gte": start_time_seconds, "$lt": end_time_seconds}}},
-            {"$group": {"_id": "$username", "count": {"$sum": 1}}},
+            {"$match": {"username": uid, "timestamp": {"$gte": start_time_seconds, "$lt": end_time_seconds}}},
+            {"$group": {"_id": "$project", "count": {"$sum": 1}}},
             {"$group": {
                 "_id": None,
                 "data": {"$push": {"k": {"$ifNull": ["$_id", "null"]},
@@ -58,7 +59,7 @@ def _project_edits_each_day(start_time_seconds, count, pid):
     return edits_each_day
 
 
-def _project_edits_each_month(date_obj, pid):
+def _user_edits_each_month(date_obj, uid):
     edits_each_month = {}
 
     for i in range(12):
@@ -67,11 +68,11 @@ def _project_edits_each_month(date_obj, pid):
         end_time_seconds = int(month_later_dt.timestamp()) * 1000
 
         documents = collection.count_documents(
-            {"project": pid, "timestamp": {"$gte": start_time_seconds, "$lt": end_time_seconds}})
+            {"username": uid, "timestamp": {"$gte": start_time_seconds, "$lt": end_time_seconds}})
 
         pipeline = [
-            {"$match": {"project": pid, "timestamp": {"$gte": start_time_seconds, "$lt": end_time_seconds}}},
-            {"$group": {"_id": "$username", "count": {"$sum": 1}}},
+            {"$match": {"username": uid, "timestamp": {"$gte": start_time_seconds, "$lt": end_time_seconds}}},
+            {"$group": {"_id": "$project", "count": {"$sum": 1}}},
             {"$group": {
                 "_id": None,
                 "data": {"$push": {"k": {"$ifNull": ["$_id", "null"]},
@@ -93,11 +94,11 @@ def _project_edits_each_month(date_obj, pid):
     return edits_each_month
 
 
-def distinct_projects():
-    return collection.distinct("project")
+def distinct_usernames():
+    return collection.distinct("username")
 
 
-def project_edits_by_week(date, pid):
+def user_edits_by_week(date, uid):
     result = {}
 
     time_string = date.split("W")[0] + date.split("W")[1] + '-1'
@@ -106,20 +107,20 @@ def project_edits_by_week(date, pid):
     start_time_seconds = int(dt.timestamp())
     start_time_seconds = start_time_seconds * 1000
 
-    edits_each_day = _project_edits_each_day(start_time_seconds, 7, pid)
+    edits_each_day = _user_edits_each_day(start_time_seconds, 7, uid)
 
     offset_days = 7 * mili_a_day
     end_time_seconds = start_time_seconds + offset_days
-    users = _find_user_progress(start_time_seconds, end_time_seconds, pid)
+    projects = _find_project_progress(start_time_seconds, end_time_seconds, uid)
 
     result["edits_each_day"] = edits_each_day
-    result["users"] = users
+    result["projects"] = projects
 
     console.log(result)
     return result
 
 
-def project_edits_by_month(date, pid):
+def user_edits_by_month(date, uid):
     result = {}
 
     time_string = date + "-01"
@@ -134,17 +135,17 @@ def project_edits_by_month(date, pid):
     start_time_seconds = start_time_seconds * 1000
     end_time_seconds = end_time_seconds * 1000
 
-    edits_each_day = _project_edits_each_day(start_time_seconds, days_in_month, pid)
-    users = _find_user_progress(start_time_seconds, end_time_seconds, pid)
+    edits_each_day = _user_edits_each_day(start_time_seconds, days_in_month, uid)
+    projects = _find_project_progress(start_time_seconds, end_time_seconds, uid)
 
     result["edits_each_day"] = edits_each_day
-    result["users"] = users
+    result["projects"] = projects
 
     console.log(result)
     return result
 
 
-def project_edits_by_year(date, pid):
+def user_edits_by_year(date, uid):
     result = {}
 
     time_string = date
@@ -158,14 +159,16 @@ def project_edits_by_year(date, pid):
     start_time_seconds = start_time_seconds * 1000
     end_time_seconds = end_time_seconds * 1000
 
-    edits_each_month = _project_edits_each_month(dt, pid)
-    users = _find_user_progress(start_time_seconds, end_time_seconds, pid)
+    edits_each_month = _user_edits_each_month(dt, uid)
+    projects = _find_project_progress(start_time_seconds, end_time_seconds, uid)
 
     result["edits_each_month"] = edits_each_month
-    result["users"] = users
+    result["projects"] = projects
 
     console.log(result)
     return result
 
 
-__all__ = ['distinct_projects', 'project_edits_by_week', 'project_edits_by_month', 'project_edits_by_year']
+
+
+__all__ = ['distinct_usernames', 'user_edits_by_week', 'user_edits_by_month', 'user_edits_by_year']

@@ -1,7 +1,7 @@
-from flask import Flask, render_template, redirect, send_from_directory
-from flask import request
-from modules.overview_data import *
-from modules.project_data import *
+from modules.utils import *
+from modules.overview_data import fetch_edits_by_week, fetch_edits_by_month, fetch_edits_by_year
+from modules.project_data import distinct_projects, project_edits_by_week, project_edits_by_month, project_edits_by_year
+from modules.user_data import distinct_usernames, user_edits_by_week, user_edits_by_month, user_edits_by_year
 
 app = Flask(__name__)
 
@@ -11,10 +11,11 @@ def get_default_date():
     year, current_week = current_date.isocalendar()[:2]
     year = str(year)
 
-    current_week = str(current_week)
+    current_week = current_date.strftime('%W')
+    current_month = current_date.strftime('%m')
+
     default_week = year + "-W" + current_week
-    month = str(current_date.month)
-    default_month = year + "-" + month
+    default_month = year + "-" + current_month
 
     data = {'maxweek': default_week, 'maxmonth': default_month}
 
@@ -75,6 +76,30 @@ def process_project_form():
         project_edits_by_year(date, pid)
     return redirect('/project')
 
+
+@app.route('/user', methods=['GET'])
+def user():
+    all_uids = distinct_usernames()
+    data = get_default_date()
+    data["all_uids"] = all_uids
+    return render_template('user.html', **data)
+
+
+@app.route('/api/user', methods=['POST'])
+def process_user_form():
+    console.log(request.form)
+    interval = request.form["interval"]
+    uid = request.form["userid"]
+    if interval == "weekly":
+        date = request.form["week"]
+        user_edits_by_week(date, uid)
+    if interval == "monthly":
+        date = request.form["month"]
+        user_edits_by_month(date, uid)
+    if interval == "annually":
+        date = request.form["year"]
+        user_edits_by_year(date, uid)
+    return redirect('/user')
 
 if __name__ == '__main__':
     app.run(debug=True)

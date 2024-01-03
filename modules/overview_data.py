@@ -1,7 +1,7 @@
 from .utils import *
 
 
-def find_top_n_users(start, end, n):
+def _find_top_n_users(start, end, n):
     field_name = "username"
     pipeline = [
         {"$match": {"timestamp": {"$gte": start, "$lt": end}}},
@@ -12,12 +12,12 @@ def find_top_n_users(start, end, n):
     ]
 
     result = list(collection.aggregate(pipeline))
-    edits_each_project = fetch_projects_edit(start, end, result)
+    edits_each_project = _fetch_projects_edit(start, end, result)
 
     return edits_each_project
 
 
-def find_top_n_projects(start, end, n):
+def _find_top_n_projects(start, end, n):
     field_name = "project"
     pipeline = [
         {"$match": {"timestamp": {"$gte": start, "$lt": end}}},
@@ -29,36 +29,12 @@ def find_top_n_projects(start, end, n):
 
     result = list(collection.aggregate(pipeline))
 
-    edits_each_author = fetch_authors_edit(start, end, result)
+    edits_each_author = _fetch_authors_edit(start, end, result)
 
     return edits_each_author
 
 
-def fetch_edits_by_week(date):
-    result = {}
-
-    time_string = date.split("W")[0] + date.split("W")[1] + '-1'
-    date_time_format = "%Y-%W-%w"
-    dt = datetime.strptime(time_string, date_time_format)
-    start_time_seconds = int(dt.timestamp())
-    start_time_seconds = start_time_seconds * 1000
-
-    edits_each_day = fetch_edits_each_day(start_time_seconds, 7)
-
-    offset_days = 7 * mili_a_day
-    end_time_seconds = start_time_seconds + offset_days
-    top_n_users = find_top_n_users(start_time_seconds, end_time_seconds, 5)
-    top_n_projects = find_top_n_projects(start_time_seconds,end_time_seconds, 5)
-
-    result["edits_each_day"] = edits_each_day
-    result["top_n_users"] = top_n_users
-    result["top_n_projects"] = top_n_projects
-
-    console.log(result)
-    return result
-
-
-def fetch_edits_each_day(start_time_seconds, count):
+def _fetch_edits_each_day(start_time_seconds, count):
     edits_each_day = {}
 
     for i in range(count):
@@ -91,7 +67,7 @@ def fetch_edits_each_day(start_time_seconds, count):
     return edits_each_day
 
 
-def fetch_edits_each_month(date_obj):
+def _fetch_edits_each_month(date_obj):
     edits_each_month = {}
 
     for i in range(12):
@@ -126,63 +102,7 @@ def fetch_edits_each_month(date_obj):
     return edits_each_month
 
 
-def fetch_edits_by_year(date):
-    result = {}
-
-    time_string = date
-    date_time_format = "%Y-%m-%d"
-    dt = datetime.strptime(time_string, date_time_format)
-    year_later_dt = dt + relativedelta(years=1)
-
-    start_time_seconds = int(dt.timestamp())
-    end_time_seconds = int(year_later_dt.timestamp())
-
-    start_time_seconds = start_time_seconds * 1000
-    end_time_seconds = end_time_seconds * 1000
-
-    edits_each_month = fetch_edits_each_month(dt)
-
-    top_n_users = find_top_n_users(start_time_seconds, end_time_seconds, 5)
-    top_n_projects = find_top_n_projects(start_time_seconds, end_time_seconds, 5)
-
-    result["edits_each_month"] = edits_each_month
-    result["top_n_users"] = top_n_users
-    result["top_n_projects"] = top_n_projects
-
-    console.log(result)
-    return result
-
-
-# date: start date, string given from html form
-def fetch_edits_by_month(date):
-    result = {}
-
-    time_string = date + "-01"
-    date_time_format = "%Y-%m-%d"
-    dt = datetime.strptime(time_string, date_time_format)
-    month_later_dt = dt + relativedelta(months=1)
-
-    start_time_seconds = int(dt.timestamp())
-    end_time_seconds = int(month_later_dt.timestamp())
-
-    days_in_month = int((end_time_seconds - start_time_seconds) / (24 * 3600))
-    start_time_seconds = start_time_seconds * 1000
-    end_time_seconds = end_time_seconds * 1000
-
-    edits_each_day = fetch_edits_each_day(start_time_seconds, days_in_month)
-
-    top_n_users = find_top_n_users(start_time_seconds, end_time_seconds, 5)
-    top_n_projects = find_top_n_projects(start_time_seconds, end_time_seconds, 5)
-
-    result["edits_each_day"] = edits_each_day
-    result["top_n_users"] = top_n_users
-    result["top_n_projects"] = top_n_projects
-
-    console.log(result)
-    return result
-
-
-def fetch_authors_edit(start, end, result):
+def _fetch_authors_edit(start, end, result):
     field_name = "username"
     edits_each_author = {}
     for each in result:
@@ -210,7 +130,7 @@ def fetch_authors_edit(start, end, result):
     return edits_each_author
 
 
-def fetch_projects_edit(start, end, result):
+def _fetch_projects_edit(start, end, result):
     field_name = "project"
     edits_each_project = {}
     for each in result:
@@ -238,3 +158,84 @@ def fetch_projects_edit(start, end, result):
 
     return edits_each_project
 
+
+def fetch_edits_by_week(date):
+    result = {}
+
+    time_string = date.split("W")[0] + date.split("W")[1] + '-1'
+    date_time_format = "%Y-%W-%w"
+    dt = datetime.strptime(time_string, date_time_format)
+    start_time_seconds = int(dt.timestamp())
+    start_time_seconds = start_time_seconds * 1000
+
+    edits_each_day = _fetch_edits_each_day(start_time_seconds, 7)
+
+    offset_days = 7 * mili_a_day
+    end_time_seconds = start_time_seconds + offset_days
+    top_n_users = _find_top_n_users(start_time_seconds, end_time_seconds, 5)
+    top_n_projects = _find_top_n_projects(start_time_seconds, end_time_seconds, 5)
+
+    result["edits_each_day"] = edits_each_day
+    result["top_n_users"] = top_n_users
+    result["top_n_projects"] = top_n_projects
+
+    console.log(result)
+    return result
+
+
+def fetch_edits_by_month(date):
+    result = {}
+
+    time_string = date + "-01"
+    date_time_format = "%Y-%m-%d"
+    dt = datetime.strptime(time_string, date_time_format)
+    month_later_dt = dt + relativedelta(months=1)
+
+    start_time_seconds = int(dt.timestamp())
+    end_time_seconds = int(month_later_dt.timestamp())
+
+    days_in_month = int((end_time_seconds - start_time_seconds) / (24 * 3600))
+    start_time_seconds = start_time_seconds * 1000
+    end_time_seconds = end_time_seconds * 1000
+
+    edits_each_day = _fetch_edits_each_day(start_time_seconds, days_in_month)
+
+    top_n_users = _find_top_n_users(start_time_seconds, end_time_seconds, 5)
+    top_n_projects = _find_top_n_projects(start_time_seconds, end_time_seconds, 5)
+
+    result["edits_each_day"] = edits_each_day
+    result["top_n_users"] = top_n_users
+    result["top_n_projects"] = top_n_projects
+
+    console.log(result)
+    return result
+
+
+def fetch_edits_by_year(date):
+    result = {}
+
+    time_string = date
+    date_time_format = "%Y-%m-%d"
+    dt = datetime.strptime(time_string, date_time_format)
+    year_later_dt = dt + relativedelta(years=1)
+
+    start_time_seconds = int(dt.timestamp())
+    end_time_seconds = int(year_later_dt.timestamp())
+
+    start_time_seconds = start_time_seconds * 1000
+    end_time_seconds = end_time_seconds * 1000
+
+    edits_each_month = _fetch_edits_each_month(dt)
+
+    top_n_users = _find_top_n_users(start_time_seconds, end_time_seconds, 5)
+    top_n_projects = _find_top_n_projects(start_time_seconds, end_time_seconds, 5)
+
+    result["edits_each_month"] = edits_each_month
+    result["top_n_users"] = top_n_users
+    result["top_n_projects"] = top_n_projects
+
+    console.log(result)
+    return result
+
+
+__all__ = ['fetch_edits_by_week', 'fetch_edits_by_month', 'fetch_edits_by_year']

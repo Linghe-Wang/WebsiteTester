@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Overview</title>
+</head>
+<body>
+    <nav class="nav-buttons">
+        <a href="/main">Overview</a>
+        <a href="/project">Project</a>
+        <a href="/user">User</a>
+    </nav>
+    <form action="/api/user" method="POST">
+        <select name="userid" id="userid">
+            {% for uid in all_uids %}
+                <option value="{{ uid }}">{{ uid }}</option>
+            {% endfor %}
+        </select>
+        <input type="week" id="weekly" name="week" min="2023-W01" max={{ maxweek }}>
+        <input type="submit" name="interval" value="weekly">
+        <input type="month" id="monthly" name="month" min="2023-01" max={{ maxmonth }}>
+        <input type="submit" name="interval" value="monthly">
+        <select name="year" id="year">
+            <option value="2023-01-01">2023</option>
+            <option value="2024-01-01">2024</option>
+        </select>
+        <input type="submit" name="interval" value="annually">
+    </form>
+</body>
+</html>
