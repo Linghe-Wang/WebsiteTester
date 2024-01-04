@@ -2,8 +2,11 @@ from modules.utils import *
 from modules.overview_data import fetch_edits_by_week, fetch_edits_by_month, fetch_edits_by_year
 from modules.project_data import distinct_projects, project_edits_by_week, project_edits_by_month, project_edits_by_year
 from modules.user_data import distinct_usernames, user_edits_by_week, user_edits_by_month, user_edits_by_year
+from modules.plot import *
 
 app = Flask(__name__)
+
+app.secret_key = 'qearvgb12345413pibergefwva'
 
 
 def get_default_date():
@@ -24,19 +27,18 @@ def get_default_date():
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(app.root_path,
-                               'resources/images/favicon.ico',
+                               'static/images/favicon.ico',
                                mimetype='image/vnd.microsoft.icon')
-
-
-@app.route('/resources/<path:filename>')
-def serve_static(filename):
-    return send_from_directory(app.root_path + '/resources', filename)
 
 
 @app.route('/', methods=['GET'])
 @app.route('/main', methods=['GET'])
 def index():
     data = get_default_date()
+    data['overview_json'] = session.get('overview_json')
+    data['top_projects_json'] = session.get('top_projects_json')
+    data['top_users_json'] = session.get('top_users_json')
+
     return render_template('main.html', **data)
 
 
@@ -44,11 +46,22 @@ def index():
 def process_form():
     key, value = next(request.form.items())
     if key == "weekly":
-        fetch_edits_by_week(value)
+        result = fetch_edits_by_week(value)
     if key == "monthly":
-        fetch_edits_by_month(value)
+        result = fetch_edits_by_month(value)
     if key == "annually":
-        fetch_edits_by_year(value)
+        result = fetch_edits_by_year(value)
+        
+    overview_data = plot_main_bar(result)
+    top_projects_data = plot_top_projects(result)
+    top_users_data = plot_top_users(result)
+    overview_json = json.dumps(overview_data)
+    top_projects_json = json.dumps(top_projects_data)
+    top_users_json = json.dumps(top_users_data)
+    session['overview_json'] = overview_json
+    session['top_projects_json'] = top_projects_json
+    session['top_users_json'] = top_users_json
+    
     return redirect('/main')
 
 

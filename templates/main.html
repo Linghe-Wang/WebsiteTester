@@ -1,8 +1,15 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/html">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Data Collection</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="text/javascript">
+        var overview_json = {{ overview_json|safe }};
+        var top_projects_json = {{ top_projects_json|safe }};
+        var top_users_json = {{ top_users_json|safe }};
+    </script>
+    <script src="{{ url_for('static', filename='js/overview_data.js') }}"></script>
 </head>
 <body>
     <nav class="nav-buttons">
@@ -25,6 +32,8 @@
         </select>
         <input type="submit" value="Apply">
     </form>
-
+    <canvas id="overviewChart" width="400" height="200"></canvas>
+    <canvas id="topProjectsChart" width="400" height="200"></canvas>
+    <canvas id="topUsersChart" width="400" height="200"></canvas>
 </body>
 </html>

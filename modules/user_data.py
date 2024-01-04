@@ -113,7 +113,7 @@ def user_edits_by_week(date, uid):
     end_time_seconds = start_time_seconds + offset_days
     projects = _find_project_progress(start_time_seconds, end_time_seconds, uid)
 
-    result["edits_each_day"] = edits_each_day
+    result["edits_each_date"] = edits_each_day
     result["projects"] = projects
 
     console.log(result)
@@ -138,7 +138,7 @@ def user_edits_by_month(date, uid):
     edits_each_day = _user_edits_each_day(start_time_seconds, days_in_month, uid)
     projects = _find_project_progress(start_time_seconds, end_time_seconds, uid)
 
-    result["edits_each_day"] = edits_each_day
+    result["edits_each_date"] = edits_each_day
     result["projects"] = projects
 
     console.log(result)
@@ -162,7 +162,7 @@ def user_edits_by_year(date, uid):
     edits_each_month = _user_edits_each_month(dt, uid)
     projects = _find_project_progress(start_time_seconds, end_time_seconds, uid)
 
-    result["edits_each_month"] = edits_each_month
+    result["edits_each_date"] = edits_each_month
     result["projects"] = projects
 
     console.log(result)

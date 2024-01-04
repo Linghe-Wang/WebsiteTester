@@ -168,14 +168,14 @@ def fetch_edits_by_week(date):
     start_time_seconds = int(dt.timestamp())
     start_time_seconds = start_time_seconds * 1000
 
-    edits_each_day = _fetch_edits_each_day(start_time_seconds, 7)
-
     offset_days = 7 * mili_a_day
     end_time_seconds = start_time_seconds + offset_days
+
+    edits_each_day = _fetch_edits_each_day(start_time_seconds, 7)
     top_n_users = _find_top_n_users(start_time_seconds, end_time_seconds, 5)
     top_n_projects = _find_top_n_projects(start_time_seconds, end_time_seconds, 5)
 
-    result["edits_each_day"] = edits_each_day
+    result["edits_each_date"] = edits_each_day
     result["top_n_users"] = top_n_users
     result["top_n_projects"] = top_n_projects
 
@@ -199,11 +199,10 @@ def fetch_edits_by_month(date):
     end_time_seconds = end_time_seconds * 1000
 
     edits_each_day = _fetch_edits_each_day(start_time_seconds, days_in_month)
-
     top_n_users = _find_top_n_users(start_time_seconds, end_time_seconds, 5)
     top_n_projects = _find_top_n_projects(start_time_seconds, end_time_seconds, 5)
 
-    result["edits_each_day"] = edits_each_day
+    result["edits_each_date"] = edits_each_day
     result["top_n_users"] = top_n_users
     result["top_n_projects"] = top_n_projects
 
@@ -226,11 +225,10 @@ def fetch_edits_by_year(date):
     end_time_seconds = end_time_seconds * 1000
 
     edits_each_month = _fetch_edits_each_month(dt)
-
     top_n_users = _find_top_n_users(start_time_seconds, end_time_seconds, 5)
     top_n_projects = _find_top_n_projects(start_time_seconds, end_time_seconds, 5)
 
-    result["edits_each_month"] = edits_each_month
+    result["edits_each_date"] = edits_each_month
     result["top_n_users"] = top_n_users
     result["top_n_projects"] = top_n_projects
 
