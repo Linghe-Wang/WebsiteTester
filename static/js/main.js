@@ -1,9 +1,11 @@
-document.addEventListener('DOMContentLoaded', function() {
+const autocolors = window['chartjs-plugin-autocolors'];
+Chart.register(autocolors);
 
-    var ctx = document.getElementById('overviewChart').getContext('2d');
+document.addEventListener('DOMContentLoaded', function() {
+    var ctx = document.getElementById('verticalChart').getContext('2d');
     var stackedBarChart = new Chart(ctx, {
         type: 'bar',
-        data: overview_json,
+        data: dataArray[0],
         options: {
             scales: {
                 x: { stacked: true },
@@ -11,11 +13,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
-
-    var ctx = document.getElementById('topProjectsChart').getContext('2d');
+    var ctx = document.getElementById('horizontalChart1').getContext('2d');
     var stackedBarChart = new Chart(ctx, {
         type: 'bar',
-        data: top_projects_json,
+        data: dataArray[1],
         options: {
             indexAxis: 'y',
             scales: {
@@ -24,11 +25,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
-
-    var ctx = document.getElementById('topUsersChart').getContext('2d');
+    var ctx = document.getElementById('horizontalChart2').getContext('2d');
     var stackedBarChart = new Chart(ctx, {
         type: 'bar',
-        data: top_users_json,
+        data: dataArray[2],
         options: {
             indexAxis: 'y',
             scales: {

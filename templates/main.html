@@ -4,12 +4,14 @@
     <meta charset="UTF-8">
     <title>Data Collection</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-autocolors"></script>
     <script type="text/javascript">
         var overview_json = {{ overview_json|safe }};
         var top_projects_json = {{ top_projects_json|safe }};
         var top_users_json = {{ top_users_json|safe }};
+        var dataArray = [overview_json, top_projects_json, top_users_json]
     </script>
-    <script src="{{ url_for('static', filename='js/overview_data.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </head>
 <body>
     <nav class="nav-buttons">
@@ -32,8 +34,17 @@
         </select>
         <input type="submit" value="Apply">
     </form>
-    <canvas id="overviewChart" width="400" height="200"></canvas>
-    <canvas id="topProjectsChart" width="400" height="200"></canvas>
-    <canvas id="topUsersChart" width="400" height="200"></canvas>
+<!--    <h2>Data Summary</h2>-->
+<!--    <canvas class="verticalChart" id="overviewChart" width="400" height="200"></canvas>-->
+<!--    <h2>Top 5 Projects</h2>-->
+<!--    <canvas class="horizontalChart" id="topProjectsChart" width="400" height="200"></canvas>-->
+<!--    <h2>Top 5 Users</h2>-->
+<!--    <canvas class="horizontalChart" id="topUsersChart" width="400" height="200"></canvas>-->
+    <h2>Data Summary</h2>
+    <canvas id="verticalChart" width="400" height="200"></canvas>
+    <h2>Top 5 Projects</h2>
+    <canvas id="horizontalChart1" width="400" height="200"></canvas>
+    <h2>Top 5 Users</h2>
+    <canvas id="horizontalChart2" width="400" height="200"></canvas>
 </body>
 </html>

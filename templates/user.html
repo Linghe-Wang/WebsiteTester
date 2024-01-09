@@ -3,6 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <title>User Overview</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-autocolors"></script>
+    <script type="text/javascript">
+        var user_json = {{ user_json|safe }};
+        var contributions_json = {{ contributions_json|safe }};
+        var dataArray = [user_json, contributions_json]
+    </script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </head>
 <body>
     <nav class="nav-buttons">
@@ -26,5 +34,13 @@
         </select>
         <input type="submit" name="interval" value="annually">
     </form>
+<!--    <h2>User Summary</h2>-->
+<!--    <canvas class="verticalCharts" id="userChart" width="400" height="200"></canvas>-->
+<!--    <h2>Contributions</h2>-->
+<!--    <canvas class="horizontalChart" id="contributionsChart" width="400" height="200"></canvas>-->
+    <h2>User Summary</h2>
+    <canvas id="verticalChart" width="400" height="200"></canvas>
+    <h2>Contributions</h2>
+    <canvas id="horizontalChart1" width="400" height="200"></canvas>
 </body>
 </html>

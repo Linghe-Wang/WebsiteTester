@@ -52,9 +52,9 @@ def process_form():
     if key == "annually":
         result = fetch_edits_by_year(value)
         
-    overview_data = plot_main_bar(result)
-    top_projects_data = plot_top_projects(result)
-    top_users_data = plot_top_users(result)
+    overview_data = plot_stack_chart(result['edits_each_date'])
+    top_projects_data = plot_stack_chart(result['top_n_projects'])
+    top_users_data = plot_stack_chart(result['top_n_users'])
     overview_json = json.dumps(overview_data)
     top_projects_json = json.dumps(top_projects_data)
     top_users_json = json.dumps(top_users_data)
@@ -70,6 +70,8 @@ def project():
     all_pids = distinct_projects()
     data = get_default_date()
     data["all_pids"] = all_pids
+    data['project_json'] = session.get('project_json')
+    data['contributors_json'] = session.get('contributors_json')
     return render_template('project.html', **data)
 
 
@@ -80,13 +82,21 @@ def process_project_form():
     pid = request.form["projectid"]
     if interval == "weekly":
         date = request.form["week"]
-        project_edits_by_week(date, pid)
+        result = project_edits_by_week(date, pid)
     if interval == "monthly":
         date = request.form["month"]
-        project_edits_by_month(date, pid)
+        result = project_edits_by_month(date, pid)
     if interval == "annually":
         date = request.form["year"]
-        project_edits_by_year(date, pid)
+        result = project_edits_by_year(date, pid)
+
+    one_project_data = plot_stack_chart(result['edits_each_date'])
+    contributors_data = plot_chart(result['users'])
+    project_json = json.dumps(one_project_data)
+    contributors_json = json.dumps(contributors_data)
+    session['project_json'] = project_json
+    session['contributors_json'] = contributors_json
+
     return redirect('/project')
 
 
@@ -95,6 +105,8 @@ def user():
     all_uids = distinct_usernames()
     data = get_default_date()
     data["all_uids"] = all_uids
+    data['user_json'] = session.get('user_json')
+    data['contributions_json'] = session.get('contributions_json')
     return render_template('user.html', **data)
 
 
@@ -105,13 +117,21 @@ def process_user_form():
     uid = request.form["userid"]
     if interval == "weekly":
         date = request.form["week"]
-        user_edits_by_week(date, uid)
+        result = user_edits_by_week(date, uid)
     if interval == "monthly":
         date = request.form["month"]
-        user_edits_by_month(date, uid)
+        result = user_edits_by_month(date, uid)
     if interval == "annually":
         date = request.form["year"]
-        user_edits_by_year(date, uid)
+        result = user_edits_by_year(date, uid)
+
+    one_user_data = plot_stack_chart(result['edits_each_date'])
+    contributions_data = plot_chart(result['projects'])
+    user_json = json.dumps(one_user_data)
+    contributions_json = json.dumps(contributions_data)
+    session['user_json'] = user_json
+    session['contributions_json'] = contributions_json
+
     return redirect('/user')
 
 if __name__ == '__main__':
