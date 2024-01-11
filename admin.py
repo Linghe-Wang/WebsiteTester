@@ -47,9 +47,9 @@ def process_form():
     key, value = next(request.form.items())
     if key == "weekly":
         result = fetch_edits_by_week(value)
-    if key == "monthly":
+    elif key == "monthly":
         result = fetch_edits_by_month(value)
-    if key == "annually":
+    elif key == "annually":
         result = fetch_edits_by_year(value)
         
     overview_data = plot_stack_chart(result['edits_each_date'])
@@ -67,9 +67,8 @@ def process_form():
 
 @app.route('/project', methods=['GET'])
 def project():
-    all_pids = distinct_projects()
     data = get_default_date()
-    data["all_pids"] = all_pids
+    data["all_pids"] = titles
     data['project_json'] = session.get('project_json')
     data['contributors_json'] = session.get('contributors_json')
     return render_template('project.html', **data)
@@ -83,10 +82,10 @@ def process_project_form():
     if interval == "weekly":
         date = request.form["week"]
         result = project_edits_by_week(date, pid)
-    if interval == "monthly":
+    elif interval == "monthly":
         date = request.form["month"]
         result = project_edits_by_month(date, pid)
-    if interval == "annually":
+    elif interval == "annually":
         date = request.form["year"]
         result = project_edits_by_year(date, pid)
 
@@ -118,10 +117,10 @@ def process_user_form():
     if interval == "weekly":
         date = request.form["week"]
         result = user_edits_by_week(date, uid)
-    if interval == "monthly":
+    elif interval == "monthly":
         date = request.form["month"]
         result = user_edits_by_month(date, uid)
-    if interval == "annually":
+    elif interval == "annually":
         date = request.form["year"]
         result = user_edits_by_year(date, uid)
 
@@ -133,6 +132,7 @@ def process_user_form():
     session['contributions_json'] = contributions_json
 
     return redirect('/user')
+
 
 if __name__ == '__main__':
     app.run(debug=True)

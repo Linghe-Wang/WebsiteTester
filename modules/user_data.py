@@ -116,7 +116,6 @@ def user_edits_by_week(date, uid):
     result["edits_each_date"] = edits_each_day
     result["projects"] = projects
 
-    console.log(result)
     return result
 
 
@@ -141,7 +140,6 @@ def user_edits_by_month(date, uid):
     result["edits_each_date"] = edits_each_day
     result["projects"] = projects
 
-    console.log(result)
     return result
 
 
@@ -165,7 +163,6 @@ def user_edits_by_year(date, uid):
     result["edits_each_date"] = edits_each_month
     result["projects"] = projects
 
-    console.log(result)
     return result
 
 

@@ -115,7 +115,6 @@ def project_edits_by_week(date, pid):
     result["edits_each_date"] = edits_each_day
     result["users"] = users
 
-    console.log(result)
     return result
 
 
@@ -140,7 +139,6 @@ def project_edits_by_month(date, pid):
     result["edits_each_date"] = edits_each_day
     result["users"] = users
 
-    console.log(result)
     return result
 
 
@@ -164,7 +162,6 @@ def project_edits_by_year(date, pid):
     result["edits_each_date"] = edits_each_month
     result["users"] = users
 
-    console.log(result)
     return result
 
 

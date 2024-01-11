@@ -21,7 +21,7 @@
     <form action="/api/project" method="POST">
         <select name="projectid" id="projectid">
             {% for pid in all_pids %}
-                <option value="{{ pid }}">{{ pid }}</option>
+                <option value="{{ pid }}">{{ all_pids[pid] }}</option>
             {% endfor %}
         </select>
         <input type="week" id="weekly" name="week" min="2023-W01" max={{ maxweek }}>
