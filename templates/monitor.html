@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Timeline</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/monitor.css') }}">
+  <script src="{{ url_for('static', filename='js/monitor.js') }}"></script>
+</head>
+<body>
+    <div class="timeline-container">
+      <form id="control" action="/api/monitor" method="POST">
+        <label for="projectID">Project ID: </label>
+        <input type="text" id="projectID" name="projectID" placeholder="Enter projectID">
+        <label for="writer_action_idx">Jump to: </label>
+        <input type="number" id="writer_action_idx" name="writer_action_idx" min="0" step="50" value="0">
+        <button type="button" onclick="retrieveProject()">Generate!</button>
+      </form>
+      <div class="slidecontainer">
+        <button class="timeline-pager timeline-pager__previous">⬅</button>
+        <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
+        <button class="timeline-pager timeline-pager__next">⮕</button>
+      </div>
+  </div>
+  <div class="document-viewer">
+    <div id="displayContent" class="displayContent" style="white-space: pre-line; width: 750px; border: 1px solid black;">
+        "The beginning of edits"
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="static/js/monitor.js"></script>
+  <br>
+  <br>
+</body>
+</html>

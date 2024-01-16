@@ -1,0 +1,30 @@
+body {
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+}
+#control {
+    display: flex;
+    flex-direction: column;
+    width: 10vw;
+
+}
+
+label {
+    display: inline-block;
+}
+
+.slider {
+    width: 50vw;
+}
+
+.timeline-pager {
+    font-size: large;
+    font-size: large;
+    color: white;
+    background: black;
+    font-weight: bolder;
+    width: 2vw;
+    height: 2vw;
+    border-radius: 50%;
+}
