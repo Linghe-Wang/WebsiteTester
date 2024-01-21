@@ -3,6 +3,7 @@ from modules.overview_data import fetch_edits_by_week, fetch_edits_by_month, fet
 from modules.project_data import distinct_projects, project_edits_by_week, project_edits_by_month, project_edits_by_year
 from modules.user_data import distinct_usernames, user_edits_by_week, user_edits_by_month, user_edits_by_year
 from modules.plot import *
+from modules.monitor import load_file_meta_data
 
 app = Flask(__name__)
 
@@ -136,7 +137,8 @@ def process_user_form():
 
 @app.route('/monitor', methods=['GET'])
 def monitor():
-    return render_template('monitor.html')
+    data = load_file_meta_data("656fadd102ae94a7686aae62")
+    return render_template('monitor.html', **data)
 
 
 # @app.route('/create', methods=('POST'))

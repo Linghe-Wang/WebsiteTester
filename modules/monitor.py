@@ -14,7 +14,8 @@ Returns:
   HTML representation.
 """
     html = []
-    for (op, data) in diffs:
+    for each in diffs:
+        op, data = each[:2]
         text = (
             data.replace("&", "&amp;")
             .replace("<", "&lt;")
@@ -34,42 +35,19 @@ Returns:
 
 def load_file_meta_data(projectID):
     data = collection.find({'project': projectID,
-                            "message": {"$ne": "assist"},
-                            "state": {"$ne": "user_selection"},
-                            'revision': {"$ne": []},
-                            })
+                            "message": {"$exists": True, "$ne": "assist"},
+                            "state": {"$exists": True, "$ne": "user_selection"},
+                            'revision': {"$exists": True, "$ne": []},
+                            'line': {"$exists": True, "$ne": ""},
+                            'editingLines': {"$exists": True, "$ne": []}
+                            }).sort("timestamp", 1).limit(500)
     actions = []
+    revisions = []
     for each in data:
-        actions.append({"file": each["file"], "username": each['username'], "timestamp": each["timestamp"]})
+        timestamp = datetime.fromtimestamp(each["timestamp"]/1000).strftime('%Y-%m-%d %H:%M:%S')
+        actions.append({"file": each["file"], "username": each['username'], "timestamp": timestamp})
+        revisions.append({"line_nums": each["editingLines"], "diff_html": diff_prettyHtml(each["revision"])})
 
-
-# def generate(projectID, writer_action_idx):
-#     diffs = []
-#     diffs_htmls = []
-#     users = []
-#     data = collection.find({'project': projectID,
-#                             "message": {"$ne": "assist"},
-#                             "state": {"$ne": "user_selection"},
-#                             'revision': {"$ne": []},
-#                             })
-#
-#     for j in range(writer_action_idx, writer_action_idx + 2):
-#         diffs.append(data[j]['revision'])
-#
-#     dmp.diff_cleanupSemantic(diffs)
-#     diffs_htmls.append(diff_prettyHtml(diffs))
-#
-#     info = []
-#     print(len(users))
-#     print(len(actions))
-#     print(len(diffs_htmls))
-#
-#     for i in range(0, len(users)):
-#         try:
-#             if i == 0:
-#                 info.append({"users": users[i], "actions": actions[i], "htmls": actions[0]['text']})
-#             if i > 0:
-#                 info.append({"users": users[i], "actions": actions[i], "htmls": diffs_htmls[i - 1]})
-#         except:
-#             break
-#     return writer_action_idx, writer_action_idx + num_action_send, info
+    # "actions" contains filename, username, and time for each frame
+    # "revisions" contains line number and difference HTML(HTML for text reconstruction)
+    return {"actions": actions, "revisions": revisions}
