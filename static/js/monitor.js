@@ -11,9 +11,11 @@ function load_frame(){
     contentBox.innerHTML = revisions_obj[idx]["diff_html"]
 
     let lineNums = revisions_obj[idx]["line_nums"]
+    let line_text = ""
     for (var i=0; i< lineNums.length; i++){
-        lineBox.innertext = lineNums+'<br>'
+        line_text = line_text + lineNums[i] + "<br>";
     }
+    lineBox.innerHTML = line_text;
 }
 
 window.addEventListener('load', function() {
@@ -36,8 +38,8 @@ window.addEventListener('load', function() {
     let lineNums = revisions_obj[idx]["line_nums"]
     let line_text = ""
     for (var i=0; i< lineNums.length; i++){
-        line_text = line_text + lineNums[i] + "\n";
+        line_text = line_text + lineNums[i] + "<br>";
     }
     console.log(line_text)
-    lineBox.textContent = line_text;
+    lineBox.innerHTML = line_text;
 })
