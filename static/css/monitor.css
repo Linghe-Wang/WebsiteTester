@@ -1,0 +1,64 @@
+/* body {
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+}
+#control {
+    display: flex;
+    flex-direction: column;
+    width: 10vw;
+
+}
+
+label {
+    display: inline-block;
+}
+
+.slider {
+    width: 50vw;
+}
+
+.timeline-pager {
+    font-size: large;
+    font-size: large;
+    color: white;
+    background: black;
+    font-weight: bolder;
+    width: 2vw;
+    height: 2vw;
+    border-radius: 50%;
+} */
+
+body {
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+}
+
+#control {
+    display: flex;
+    flex-direction: row;
+}
+
+
+#meta {
+    width: 13vw;
+    border: 0.01vw solid;
+}
+
+#mainContainer {
+    margin-top: 2vh;
+    display: flex;
+    flex-direction: row;
+    width: 65vw;
+}
+
+#displayLines {
+    width: 5%;
+    border: 0.01vw solid;
+}
+
+#displayContent {
+    width: 95%;
+    border: 0.01vw solid;
+}

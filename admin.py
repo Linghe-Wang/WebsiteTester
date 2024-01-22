@@ -3,6 +3,7 @@ from modules.overview_data import fetch_edits_by_week, fetch_edits_by_month, fet
 from modules.project_data import distinct_projects, project_edits_by_week, project_edits_by_month, project_edits_by_year
 from modules.user_data import distinct_usernames, user_edits_by_week, user_edits_by_month, user_edits_by_year
 from modules.plot import *
+from modules.monitor import load_file_meta_data
 
 app = Flask(__name__)
 
@@ -145,6 +146,33 @@ def process_user_form():
     session['contributions_json'] = contributions_json
 
     return redirect('/user')
+
+@app.route('/monitor', methods=['GET'])
+def monitor():
+    data = load_file_meta_data("656fadd102ae94a7686aae62")
+    return render_template('monitor.html', **data)
+
+
+# @app.route('/create', methods=('POST'))
+# def create():
+#     print(request.method)
+#     info = request.get_json(force=True)
+#     print("THIS IS THE REQUEST", info)
+#     projectID = info["projectID"]
+#     writer_action_idx = info["writer_action_idx"]
+#     writer_action_offset = info["writer_action_offset"]
+#
+#     if collection.count_documents({'project': projectID}) > writer_action_idx:
+#         min_idx, max_idx, info = generate(projectID, writer_action_idx, writer_action_offset)
+#     else:
+#         min_idx = -1
+#         max_idx = -1
+#         info = [{"action": {"file": "400 Error", "text": "POST /create: Invalid Index",
+#                             "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S')},
+#                  "htmls": "POST /create: Invalid Index. The index you entered either too small or too large.",
+#                  "user": "Server"}]
+#     response = {"min": min_idx, "max": max_idx, "status": "ok", "info": info}
+#     response = jsonify(response)
 
 if __name__ == '__main__':
     app.run(debug=True)
