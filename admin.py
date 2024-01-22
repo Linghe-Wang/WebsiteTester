@@ -8,7 +8,6 @@ app = Flask(__name__)
 
 app.secret_key = 'qearvgb12345413pibergefwva'
 
-
 def get_default_date():
     current_date = datetime.now()
     year, current_week = current_date.isocalendar()[:2]
@@ -64,6 +63,23 @@ def process_form():
     
     return redirect('/main')
 
+@app.route('/progress', methods=['GET'])
+def progress():
+    # data = get_default_date()
+    # data["all_pids"] = titles
+    # data['project_json'] = session.get('project_json')
+    # data['contributors_json'] = session.get('contributors_json')
+    # return render_template('progress.html', **data)
+    return render_template('progress.html')
+
+@app.route('/monitor', methods=['GET'])
+def monitor():
+    # data = get_default_date()
+    # data["all_pids"] = titles
+    # data['project_json'] = session.get('project_json')
+    # data['contributors_json'] = session.get('contributors_json')
+    return render_template('monitor.html',)
+
 
 @app.route('/project', methods=['GET'])
 def project():
@@ -72,7 +88,6 @@ def project():
     data['project_json'] = session.get('project_json')
     data['contributors_json'] = session.get('contributors_json')
     return render_template('project.html', **data)
-
 
 @app.route('/api/project', methods=['POST'])
 def process_project_form():
@@ -98,7 +113,6 @@ def process_project_form():
 
     return redirect('/project')
 
-
 @app.route('/user', methods=['GET'])
 def user():
     all_uids = distinct_usernames()
@@ -107,7 +121,6 @@ def user():
     data['user_json'] = session.get('user_json')
     data['contributions_json'] = session.get('contributions_json')
     return render_template('user.html', **data)
-
 
 @app.route('/api/user', methods=['POST'])
 def process_user_form():
@@ -132,7 +145,6 @@ def process_user_form():
     session['contributions_json'] = contributions_json
 
     return redirect('/user')
-
 
 if __name__ == '__main__':
     app.run(debug=True)
