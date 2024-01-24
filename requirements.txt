@@ -3,3 +3,4 @@ flask
 rich
 pylatexenc
 python-dateutil
+diff_match_patch

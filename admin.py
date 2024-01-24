@@ -73,13 +73,13 @@ def progress():
     # return render_template('progress.html', **data)
     return render_template('progress.html')
 
-@app.route('/monitor', methods=['GET'])
-def monitor():
-    # data = get_default_date()
-    # data["all_pids"] = titles
-    # data['project_json'] = session.get('project_json')
-    # data['contributors_json'] = session.get('contributors_json')
-    return render_template('monitor.html',)
+# @app.route('/monitor', methods=['GET'])
+# def monitor():
+#     # data = get_default_date()
+#     # data["all_pids"] = titles
+#     # data['project_json'] = session.get('project_json')
+#     # data['contributors_json'] = session.get('contributors_json')
+#     return render_template('monitor.html',)
 
 
 @app.route('/project', methods=['GET'])
@@ -144,7 +144,6 @@ def process_user_form():
     contributions_json = json.dumps(contributions_data)
     session['user_json'] = user_json
     session['contributions_json'] = contributions_json
-
     return redirect('/user')
 
 @app.route('/monitor', methods=['GET'])

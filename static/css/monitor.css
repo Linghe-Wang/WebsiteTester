@@ -42,12 +42,11 @@ body {
 
 
 #meta {
+
     width: 13vw;
-    border: 0.01vw solid;
 }
 
 #mainContainer {
-    margin-top: 2vh;
     display: flex;
     flex-direction: row;
     width: 65vw;
