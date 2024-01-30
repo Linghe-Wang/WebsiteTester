@@ -151,6 +151,11 @@ def monitor():
     data = load_file_meta_data("656fadd102ae94a7686aae62")
     return render_template('monitor.html', **data)
 
+@app.route('/monitorwhole', methods=['GET'])
+def monitorWhole():
+    data = load_file_meta_data("656fadd102ae94a7686aae62")
+    return render_template('monitorWhole.html', **data)
+
 
 # @app.route('/create', methods=('POST'))
 # def create():

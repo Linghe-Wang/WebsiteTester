@@ -5,6 +5,7 @@ let contentBox;
 let currentTex = 0;
 let currentIndex = 0
 let indexObj = {}
+let isCurrentModeByFiles = false;
 
 let fileBox
 let timeStampBox
@@ -87,9 +88,8 @@ function load_frame(data, revision){
     }
     lineBox.innerHTML = line_text;
 }
-
 function generateButtons(fileNamesArray) {
-  const btnGroup = document.querySelector('.btn-group');
+  const btnGroup = document.querySelector('.fileButtons');
 
   // Create and append buttons based on the file names array
   fileNamesArray.forEach((fileName, index) => {
@@ -139,8 +139,6 @@ function handleTabClick(index, fileName) {
     var slider = document.getElementById('myRange');
     // Set the new value
     console.log(indexObj)
-//    slider.value = indexObj[fileName];
-//    alert(indexObj[fileName])
     // Set the new max value
     slider.setAttribute('data-slider-max', organizedData[currentTex].length - 1);
     slider.max = organizedData[currentTex].length - 1;
@@ -177,9 +175,6 @@ function organizeByTex(data, fileData) {
 
 window.addEventListener('load', function() {
     metaBox = document.querySelector('#meta');
-//    fileBox = document.querySelector('#file');
-//    userNameBox= document.querySelector('#userName');
-//    timeStamp= document.querySelector('#timeStamp');
     lineBox = document.querySelector('#displayLines');
     contentBox = document.querySelector('#displayContent');
 
@@ -197,7 +192,6 @@ window.addEventListener('load', function() {
 
     //separate data by .tex
     document.querySelector('#prev').addEventListener("click", function(){
-        idx = idx - 1;
         indexArr[currentIndex] = indexArr[currentIndex] - 1
 
         if (indexObj[currentTex] - 1 <= 0)
@@ -213,7 +207,6 @@ window.addEventListener('load', function() {
         load_frame(separated, organizedData)
     })
     document.querySelector('#next').addEventListener("click", function(){
-        idx = idx + 1;
         indexArr[currentIndex] = indexArr[currentIndex] + 1
 
 
@@ -234,9 +227,6 @@ window.addEventListener('load', function() {
         let jump = document.getElementById("jumpIndex").value;
         jump = parseInt(jump)
 
-
-        idx = idx + jump;
-
         if (jump >= organizedData[currentTex].length )
         {
             alert("Please choose a smaller value!")
@@ -253,6 +243,8 @@ window.addEventListener('load', function() {
 //        slider.value= idx
         load_frame(separated, organizedData)
     })
+
+
     console.log("here");
 
     metaBox.innerHTML = separated[currentIndex][0]["file"]+'<br>'+separated[currentIndex][0]["username"]+"<br>"+separated[currentIndex][0]["timestamp"]
@@ -279,10 +271,6 @@ window.addEventListener('load', function() {
 
     // Add an onchange event listener to the slider
     slider.oninput = function() {
-        // Update the value displayed
-//        output.innerHTML = this.value;
-
-    // Call your custom function here
     onChangeFunction(this.value);
     };
 
