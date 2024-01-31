@@ -141,7 +141,17 @@ function handleTabClick(index, fileName) {
     console.log(indexObj)
     // Set the new max value
     slider.setAttribute('data-slider-max', organizedData[currentTex].length - 1);
+
+    // adds max length to the slider
+    let fileLength = organizedData[currentTex].length
+    let fileSizeDoc = document.getElementById('fileSize');
+    fileSizeDoc.innerHTML = fileLength;
+//    fileSizeDoc.appendChild(text);
+
     slider.max = organizedData[currentTex].length - 1;
+
+    // resets the value of the slider
+    slider.value = 0;
 
     var inputEvent = new Event('input', { bubbles: true });
     slider.dispatchEvent(inputEvent);
