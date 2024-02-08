@@ -295,5 +295,3 @@ window.addEventListener('load', function() {
     load_frame(separated, organizedData)
   }
 })
-
-

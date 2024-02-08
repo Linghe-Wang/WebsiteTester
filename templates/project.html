@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Project Overview</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/loader.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-autocolors"></script>
     <script type="text/javascript">
@@ -35,13 +36,13 @@
         <input type="submit" name="interval" value="annually">
         <button> <a style="text-decoration:none; color: black" href="/monitor">View Trajectory</a> </button>
     </form>
-<!--    <h2>Project Summary</h2>-->
-<!--    <canvas class="verticalChart" id="projectChart" width="400" height="200"></canvas>-->
-<!--    <h2>Contributors</h2>-->
-<!--    <canvas class="horizontalChart" id="contributorsChart" width="400" height="200"></canvas>-->
     <h2>Project Summary</h2>
-    <canvas id="verticalChart" width="400" height="200"></canvas>
+    <canvas id="verticalChart" width="400" height="200" ></canvas>
+<!--    <canvas id="verticalChart" width="400" height="200" style="display: none"></canvas>-->
+    <div id="projectLoader" class="projectLoader" style="display: none; margin:auto; margin-top:10vh; margin-bottom:10vh"></div>
     <h2>Contributors</h2>
-    <canvas id="horizontalChart1" width="400" height="200"></canvas>
+    <canvas id="horizontalChart1" width="400" height="200" ></canvas>
+<!--    <canvas id="horizontalChart1" width="400" height="200" style="display: none"></canvas>-->
+    <div id="contributorsLoader" class="contributorsLoader" style="display: none; margin:auto; margin-top:10vh; margin-bottom:10vh"></div>
 </body>
 </html>

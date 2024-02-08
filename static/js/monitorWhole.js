@@ -1,20 +1,62 @@
-let idx = 0
+let idx = 0;
+let arrayIdx = 0;
+let globalMin = 0;
+let globalMax = 499;
 let metaBox;
 let lineBox;
 let contentBox;
-
+let loadBox;
+let buttonGroupBox
+let mainBox
+let mainLoader
+let organizedData = {};
+console.log(actions_obj)
 console.log(actions_obj[0])
+let isLoading = false;
 
-function load_frame(){
-    metaBox.innerHTML = actions_obj[idx]["file"]+'<br>'+actions_obj[idx]["username"]+"<br>"+actions_obj[idx]["timestamp"]
+// helper function call by load_frame that fetch edits from server
+async function get_frame(){
+ const response = await fetch("http://127.0.0.1:5000" + "/api/monitor", {
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        method: 'POST',
+        body: JSON.stringify({idx: idx}),
+    });
+    const message = await response.json();
+    return message;
+}
 
-    contentBox.innerHTML = revisions_obj[idx]["diff_html"]
+// load the frame based on idx
+async function load_frame(){
+    // If the idx exceed the range of given data, fetch from the server.
+    if((idx > globalMax) || (idx < globalMin)){
+        console.log("fetch!")
+        pyDict = await get_frame();
+        actions_obj = pyDict["actions"];
+        revisions_obj = pyDict["revisions"];
+        globalMin = pyDict["min"];
+        globalMax = pyDict["max"]
+    }
+    // render the frame along with metadata
+    arrayIdx = idx - globalMin
+    metaBox.innerHTML = actions_obj[arrayIdx]["file"]+'<br>'+actions_obj[arrayIdx]["username"]+"<br>"+actions_obj[arrayIdx]["timestamp"]+"<br>"+idx
 
-    let lineNums = revisions_obj[idx]["line_nums"]
+    contentBox.innerHTML = revisions_obj[arrayIdx]["diff_html"]
+
+    // hides the loader
+    loadBox.style.display = "none"
+    // shows the button group
+    buttonGroupBox.style.display = ""
+    mainBox.style.display = ""
+
+    let lineNums = revisions_obj[arrayIdx]["line_nums"]
     for (var i=0; i< lineNums.length; i++){
         lineBox.innertext = lineNums+'<br>'
     }
 }
+
 function getFileNames(data) {
   const fileNamesSet = new Set();
 
@@ -26,6 +68,7 @@ function getFileNames(data) {
   // Convert the Set to an array and return it
   return Array.from(fileNamesSet);
 }
+
 function generateButtons(fileNamesArray) {
   const btnGroup = document.querySelector('.fileButtons');
 
@@ -53,7 +96,7 @@ function generateButtons(fileNamesArray) {
     label.textContent = `${fileName}`;
 
     // Check the radio button based on the condition
-    if (actions_obj[idx]["file"] == fileName) {
+    if (actions_obj[arrayIdx]["file"] == fileName) {
       radioInput.checked = true;
     }
 
@@ -78,39 +121,43 @@ window.addEventListener('load', function() {
     lineBox = document.querySelector('#displayLines');
     contentBox = document.querySelector('#displayContent');
     let slider = document.getElementById("myRange");
+    buttonGroupBox = document.getElementById("buttonGroup");
+    mainBox = document.getElementById("mainContainer");
+    loadBox =document.getElementById("loader");
 
     // Get the output element where the value will be displayed
     let output = document.getElementById("sliderValue");
 
     // generates names of the .tex
-    const fileNamesArray = getFileNames(actions_obj);
+    const fileNamesArray = filenames_obj;
     console.log(fileNamesArray)
     generateButtons(fileNamesArray);
 
     document.querySelector('#prev').addEventListener("click", function(){
-    if (idx  >0)
-    {
-        idx = idx - 1;
-        load_frame()
-        slider.value = idx
-        generateButtons(fileNamesArray);
+        if (idx  >0)
+        {
+            idx = idx - 1;
+            slider.value = idx;
+            load_frame().then(function() {
+                generateButtons(fileNamesArray);
+            })
         }
-
     })
     document.querySelector('#next').addEventListener("click", function(){
-        if (idx  < 500)
+        if (idx  < no_of_doc)
         {
             idx = idx + 1;
-            load_frame()
-            slider.value = idx
-            generateButtons(fileNamesArray);
+            slider.value = idx;
+            load_frame().then(function() {
+                generateButtons(fileNamesArray);
+            })
         }
     })
     document.querySelector('#jump').addEventListener("click", function(){
         let jump = document.getElementById("jumpIndex").value;
         jump = parseInt(jump)
 
-        if (jump > 500 )
+        if (jump > no_of_doc)
         {
             alert("Please choose a smaller value!")
         }
@@ -126,16 +173,8 @@ window.addEventListener('load', function() {
         load_frame()
     })
 
-    console.log("here");
-    metaBox.innerHTML = actions_obj[idx]["file"]+'<br>'+actions_obj[idx]["username"]+"<br>"+actions_obj[idx]["timestamp"]
-    contentBox.innerHTML = revisions_obj[idx]["diff_html"]
-    let lineNums = revisions_obj[idx]["line_nums"]
-    let line_text = ""
-    for (var i=0; i< lineNums.length; i++){
-        line_text = line_text + lineNums[i] + "\n";
-    }
-    console.log(line_text)
-    lineBox.textContent = line_text;
+    //load the first frame after page load
+    load_frame()
 
     // slider
     slider.oninput = function() {
@@ -144,11 +183,31 @@ window.addEventListener('load', function() {
 
     // Custom onchange function for slider
     function onChangeFunction(value) {
+        // displays the loader
+        loadBox.style.display = ""
+        // hides button group
+        buttonGroupBox.style.display = "none"
+        mainBox.style.display = "none"
+
         let setIndex = parseInt(value)
         idx = setIndex
         console.log(idx)
-        // generate a new button group
-        generateButtons(fileNamesArray);
-        load_frame()
-  }
+        // load the frame and generate a new button group
+        load_frame().then(function() {
+            generateButtons(fileNamesArray);
+        })
+    }
 })
+
+// function that runs before load
+window.onbeforeunload = function () {
+    console.log("Loading Monitor Whole")
+    let body = document.getElementById("body");
+
+    // hides body while loading
+    body.style.display = "none"
+
+    // shows the main loader while loading
+    mainLoader = document.getElementById("mainLoader");
+    mainLoader.style.display = ""
+    }

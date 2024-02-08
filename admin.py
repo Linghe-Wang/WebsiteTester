@@ -3,7 +3,7 @@ from modules.overview_data import fetch_edits_by_week, fetch_edits_by_month, fet
 from modules.project_data import distinct_projects, project_edits_by_week, project_edits_by_month, project_edits_by_year
 from modules.user_data import distinct_usernames, user_edits_by_week, user_edits_by_month, user_edits_by_year
 from modules.plot import *
-from modules.monitor import load_file_meta_data
+from modules.monitor import initialize_admin_data, load_chunk_by_time, load_chunk_by_file
 
 app = Flask(__name__)
 
@@ -73,14 +73,6 @@ def progress():
     # return render_template('progress.html', **data)
     return render_template('progress.html')
 
-# @app.route('/monitor', methods=['GET'])
-# def monitor():
-#     # data = get_default_date()
-#     # data["all_pids"] = titles
-#     # data['project_json'] = session.get('project_json')
-#     # data['contributors_json'] = session.get('contributors_json')
-#     return render_template('monitor.html',)
-
 
 @app.route('/project', methods=['GET'])
 def project():
@@ -88,6 +80,8 @@ def project():
     data["all_pids"] = titles
     data['project_json'] = session.get('project_json')
     data['contributors_json'] = session.get('contributors_json')
+    if "project_id" not in session:
+        session["project_id"] = next(iter(titles))
     return render_template('project.html', **data)
 
 @app.route('/api/project', methods=['POST'])
@@ -95,6 +89,7 @@ def process_project_form():
     console.log(request.form)
     interval = request.form["interval"]
     pid = request.form["projectid"]
+    session["project_id"] = pid
     if interval == "weekly":
         date = request.form["week"]
         result = project_edits_by_week(date, pid)
@@ -146,37 +141,31 @@ def process_user_form():
     session['contributions_json'] = contributions_json
     return redirect('/user')
 
+
 @app.route('/monitor', methods=['GET'])
 def monitor():
-    data = load_file_meta_data("656fadd102ae94a7686aae62")
+    data = initialize_admin_data(session.get("project_id"))
     return render_template('monitor.html', **data)
 
-@app.route('/monitorwhole', methods=['GET'])
-def monitorWhole():
-    data = load_file_meta_data("656fadd102ae94a7686aae62")
+
+@app.route('/monitorwhole/', methods=['GET'])
+def monitor_whole():
+    data = initialize_admin_data(session.get("project_id"))
     return render_template('monitorWhole.html', **data)
 
+@app.route('/api/monitor', methods=['POST'])
+def get_500_edit():
+    info = request.get_json(force=True)
+    data = load_chunk_by_time(session.get("project_id"), info["idx"])
+    return jsonify(data)
 
-# @app.route('/create', methods=('POST'))
-# def create():
-#     print(request.method)
-#     info = request.get_json(force=True)
-#     print("THIS IS THE REQUEST", info)
-#     projectID = info["projectID"]
-#     writer_action_idx = info["writer_action_idx"]
-#     writer_action_offset = info["writer_action_offset"]
-#
-#     if collection.count_documents({'project': projectID}) > writer_action_idx:
-#         min_idx, max_idx, info = generate(projectID, writer_action_idx, writer_action_offset)
-#     else:
-#         min_idx = -1
-#         max_idx = -1
-#         info = [{"action": {"file": "400 Error", "text": "POST /create: Invalid Index",
-#                             "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S')},
-#                  "htmls": "POST /create: Invalid Index. The index you entered either too small or too large.",
-#                  "user": "Server"}]
-#     response = {"min": min_idx, "max": max_idx, "status": "ok", "info": info}
-#     response = jsonify(response)
+
+@app.route('/api/monitorwhole', methods=['POST'])
+def get_500_edit_file():
+    info = request.get_json(force=True)
+    data = load_chunk_by_file(session.get("project_id"), info["idx"], info["file"])
+    return jsonify(data)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
