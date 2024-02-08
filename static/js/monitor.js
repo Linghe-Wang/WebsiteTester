@@ -6,6 +6,7 @@ let currentTex = 0;
 let currentIndex = 0
 let indexObj = {}
 let isCurrentModeByFiles = false;
+let mainLoader
 
 let fileBox
 let timeStampBox
@@ -59,7 +60,7 @@ async function load_frame(){
     }
     // render the frame along with metadata
     arrayIdx = indexObj[currentTex] - minObj[currentTex]
-    metaBox.innerHTML = organizedData[currentTex][arrayIdx]["file"]+'<br>'+organizedData[currentTex][arrayIdx]["username"]+"<br>"+organizedData[currentTex][arrayIdx]["timestamp"]
+    metaBox.innerHTML = organizedData[currentTex][arrayIdx]["file"]+'<br>'+organizedData[currentTex][arrayIdx]["username"]+"<br>"+organizedData[currentTex][arrayIdx]["timestamp"]+"<br>"+indexObj[currentTex]
     userNameBox = organizedData[currentTex][arrayIdx]["username"]
     contentBox.innerHTML = organizedData[currentTex][arrayIdx]["diff_html"]
     let lineNums = organizedData[currentTex][arrayIdx]["line_nums"]
@@ -124,6 +125,12 @@ function handleTabClick(index, fileName) {
     console.log(indexObj)
     // Set the new max value
     slider.setAttribute('data-slider-max', no_of_doc_file[currentTex] - 1);
+
+    // adds max length to the slider
+    let fileLength = no_of_doc_file[currentTex] - 1
+    let fileSizeDoc = document.getElementById('fileSize');
+    fileSizeDoc.innerHTML = fileLength;
+
     slider.max = no_of_doc_file[currentTex] - 1;
 
     var inputEvent = new Event('input', { bubbles: true });
@@ -175,12 +182,19 @@ window.addEventListener('load', function() {
     console.log("Organized: ", organizedData);
     console.log("minObj: ", minObj);
     console.log("maxObj: ", maxObj);
+    console.log("numbers: ", no_of_doc_file)
     indexObj = generateIndexObj(actions_obj)
 
     // Get elements from HTML document
     metaBox = document.querySelector('#meta');
     lineBox = document.querySelector('#displayLines');
     contentBox = document.querySelector('#displayContent');
+
+    // adds max length to the bottom of the slider
+    let firstFile = Object.keys(no_of_doc_file)[0]
+    let fileLength = no_of_doc_file[firstFile] - 1
+    let fileSizeDoc = document.getElementById('fileSize');
+    fileSizeDoc.innerHTML = fileLength;
 
     // Get the range slider element
     let slider = document.getElementById("myRange");
@@ -265,5 +279,18 @@ window.addEventListener('load', function() {
     load_frame()
   }
 })
+
+// function that runs before load
+window.onbeforeunload = function () {
+    console.log("Loading Monitor")
+    let body = document.getElementById("body");
+
+    // hides body while loading
+    body.style.display = "none"
+
+    // shows the main loader while loading
+    mainLoader = document.getElementById("mainLoader");
+    mainLoader.style.display = ""
+    }
 
 
