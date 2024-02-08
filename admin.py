@@ -153,7 +153,6 @@ def monitor_whole():
     data = initialize_admin_data(session.get("project_id"))
     return render_template('monitorWhole.html', **data)
 
-
 @app.route('/api/monitor', methods=['POST'])
 def get_500_edit():
     info = request.get_json(force=True)
