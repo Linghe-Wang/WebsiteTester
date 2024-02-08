@@ -9,6 +9,7 @@ app = Flask(__name__)
 
 app.secret_key = 'qearvgb12345413pibergefwva'
 
+
 def get_default_date():
     current_date = datetime.now()
     year, current_week = current_date.isocalendar()[:2]
@@ -23,6 +24,7 @@ def get_default_date():
     data = {'maxweek': default_week, 'maxmonth': default_month}
 
     return data
+
 
 @app.route('/favicon.ico')
 def favicon():
@@ -51,7 +53,7 @@ def process_form():
         result = fetch_edits_by_month(value)
     elif key == "annually":
         result = fetch_edits_by_year(value)
-        
+
     overview_data = plot_stack_chart(result['edits_each_date'])
     top_projects_data = plot_stack_chart(result['top_n_projects'])
     top_users_data = plot_stack_chart(result['top_n_users'])
@@ -61,8 +63,9 @@ def process_form():
     session['overview_json'] = overview_json
     session['top_projects_json'] = top_projects_json
     session['top_users_json'] = top_users_json
-    
+
     return redirect('/main')
+
 
 @app.route('/progress', methods=['GET'])
 def progress():
@@ -83,6 +86,7 @@ def project():
     if "project_id" not in session:
         session["project_id"] = next(iter(titles))
     return render_template('project.html', **data)
+
 
 @app.route('/api/project', methods=['POST'])
 def process_project_form():
@@ -109,6 +113,7 @@ def process_project_form():
 
     return redirect('/project')
 
+
 @app.route('/user', methods=['GET'])
 def user():
     all_uids = distinct_usernames()
@@ -117,6 +122,7 @@ def user():
     data['user_json'] = session.get('user_json')
     data['contributions_json'] = session.get('contributions_json')
     return render_template('user.html', **data)
+
 
 @app.route('/api/user', methods=['POST'])
 def process_user_form():
@@ -152,6 +158,7 @@ def monitor():
 def monitor_whole():
     data = initialize_admin_data(session.get("project_id"))
     return render_template('monitorWhole.html', **data)
+
 
 @app.route('/api/monitor', methods=['POST'])
 def get_500_edit():

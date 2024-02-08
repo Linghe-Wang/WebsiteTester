@@ -1,4 +1,4 @@
-let idx = 0
+let arrayIdx = 0
 let metaBox;
 let lineBox;
 let contentBox;
@@ -6,6 +6,7 @@ let currentTex = 0;
 let currentIndex = 0
 let indexObj = {}
 let isCurrentModeByFiles = false;
+let mainLoader
 
 let fileBox
 let timeStampBox
@@ -14,44 +15,14 @@ let userNameBox
 console.log(actions_obj)
 console.log(revisions_obj)
 
-let separated = separateByTex(actions_obj)
-console.log("Separated: ", separated)
+let organizedData = {};
 
-const organizedData = organizeByTex(revisions_obj, actions_obj);
-console.log("Organized: ", organizedData);
-
-indexObj = generateIndexObj(actions_obj)
-
-function separateByTex (data) {
-    const separatedData = {};
-    // Iterate through the original data
-    data.forEach(item => {
-    const { file, ...rest } = item;
-
-    // If the file is not in the separatedData object, create an array for it
-    if (!separatedData[file]) {
-        separatedData[file] = [];
-    }
-
-    // Add the item to the corresponding file array
-    separatedData[file].push({ file, ...rest });
-    });
-
-    // Convert the separatedData object values into an array
-    const result = Object.values(separatedData);
-    return result
-    // Log the result
-    //    console.log(result);
-    }
+let maxObj = {}
+let minObj = {}
 
 function generateIndexObj(data) {
-  const fileNamesSet = new Set();
+  const fileNamesSet = filenames_obj;
   const fileNameObj = {}
-
-  // Iterate through the original data and add unique file names to the Set
-  data.forEach(item => {
-    fileNamesSet.add(item.file);
-  });
 
   for (const value of fileNamesSet) {
     if (!fileNameObj[value])
@@ -60,34 +31,46 @@ function generateIndexObj(data) {
     }
 }
 
-  console.log(fileNameObj)
   // Convert the Set to an array and return it
   return fileNameObj
 }
 
-function getFileNames(data) {
-  const fileNamesSet = new Set();
-
-  // Iterate through the original data and add unique file names to the Set
-  data.forEach(item => {
-    fileNamesSet.add(item.file);
-  });
-
-  // Convert the Set to an array and return it
-  return Array.from(fileNamesSet);
+// helper function call by load_frame that fetch edits from server
+async function get_frame(){
+ const response = await fetch("http://127.0.0.1:5000" + "/api/monitorwhole", {
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        method: 'POST',
+        body: JSON.stringify({idx: indexObj[currentTex], file: currentTex}),
+    });
+    const message = await response.json();
+    return message;
 }
 
-function load_frame(data, revision){
-    metaBox.innerHTML = revision[currentTex][indexObj[currentTex]]["file"]+'<br>'+revision[currentTex][indexObj[currentTex]]["username"]+"<br>"+revision[currentTex][indexObj[currentTex]]["timestamp"]
-    userNameBox = revision[currentTex][indexObj[currentTex]]["username"]
-    contentBox.innerHTML = revision[currentTex][indexObj[currentTex]]["diff_html"]
-    let lineNums = revision[currentTex][indexObj[currentTex]]["line_nums"]
+async function load_frame(){
+    // If the idx exceed the range of given data, fetch from the server.
+    if ((indexObj[currentTex] > maxObj[currentTex]) || (indexObj[currentTex] < minObj[currentTex])){
+        console.log("fetch!")
+        pyDict = await get_frame();
+        organizeByTex(pyDict["revisions"], pyDict["actions"]);
+        minObj[currentTex] = pyDict["min"];
+        maxObj[currentTex] = pyDict["max"]
+    }
+    // render the frame along with metadata
+    arrayIdx = indexObj[currentTex] - minObj[currentTex]
+    metaBox.innerHTML = organizedData[currentTex][arrayIdx]["file"]+'<br>'+organizedData[currentTex][arrayIdx]["username"]+"<br>"+organizedData[currentTex][arrayIdx]["timestamp"]+"<br>"+indexObj[currentTex]
+    userNameBox = organizedData[currentTex][arrayIdx]["username"]
+    contentBox.innerHTML = organizedData[currentTex][arrayIdx]["diff_html"]
+    let lineNums = organizedData[currentTex][arrayIdx]["line_nums"]
     let line_text = ""
     for (var i=0; i< lineNums.length; i++){
         line_text = line_text + lineNums[i] + "<br>";
     }
     lineBox.innerHTML = line_text;
 }
+
 function generateButtons(fileNamesArray) {
   const btnGroup = document.querySelector('.fileButtons');
 
@@ -132,6 +115,7 @@ function generateButtons(fileNamesArray) {
 
 function handleTabClick(index, fileName) {
   // Add your logic here when a button is clicked
+  console.log(index)
   currentIndex = index
   currentTex = fileName
   // re-sets the value of the slider to appropriate index
@@ -140,28 +124,24 @@ function handleTabClick(index, fileName) {
     // Set the new value
     console.log(indexObj)
     // Set the new max value
-    slider.setAttribute('data-slider-max', organizedData[currentTex].length - 1);
+    slider.setAttribute('data-slider-max', no_of_doc_file[currentTex] - 1);
 
     // adds max length to the slider
-    let fileLength = organizedData[currentTex].length
+    let fileLength = no_of_doc_file[currentTex] - 1
     let fileSizeDoc = document.getElementById('fileSize');
     fileSizeDoc.innerHTML = fileLength;
-//    fileSizeDoc.appendChild(text);
 
-    slider.max = organizedData[currentTex].length - 1;
-
-    // resets the value of the slider
-    slider.value = 0;
+    slider.max = no_of_doc_file[currentTex] - 1;
 
     var inputEvent = new Event('input', { bubbles: true });
-    slider.dispatchEvent(inputEvent);
+    slider.value = indexObj[fileName];
 
-  load_frame(separated, organizedData)
+  load_frame()
   // You can perform actions like updating the content based on the clicked button, etc.
 }
 
 function organizeByTex(data, fileData) {
-  const result = {};
+  let result = {};
 
   // Iterate through the data and organize by key
   data.forEach((obj, index) => {
@@ -180,13 +160,41 @@ function organizeByTex(data, fileData) {
     result[fileName].push(obj);
   });
 
-  return result;
+  for (const key in result) {
+    organizedData[key] = result[key];
+  }
 }
 
 window.addEventListener('load', function() {
+    // Setup the important data that generate frames
+    organizeByTex(revisions_obj, actions_obj);
+
+    // minObj and maxObj stands for each file's frame interval
+    for (const elem of filenames_obj) {
+        if (organizedData.hasOwnProperty(elem)){
+            minObj[elem] = 0;
+            maxObj[elem] = organizedData[elem].length - 1;
+        }else{
+            minObj[elem] = 0;
+            maxObj[elem] = -1;
+        }
+    }
+    console.log("Organized: ", organizedData);
+    console.log("minObj: ", minObj);
+    console.log("maxObj: ", maxObj);
+    console.log("numbers: ", no_of_doc_file)
+    indexObj = generateIndexObj(actions_obj)
+
+    // Get elements from HTML document
     metaBox = document.querySelector('#meta');
     lineBox = document.querySelector('#displayLines');
     contentBox = document.querySelector('#displayContent');
+
+    // adds max length to the bottom of the slider
+    let firstFile = Object.keys(no_of_doc_file)[0]
+    let fileLength = no_of_doc_file[firstFile] - 1
+    let fileSizeDoc = document.getElementById('fileSize');
+    fileSizeDoc.innerHTML = fileLength;
 
     // Get the range slider element
     let slider = document.getElementById("myRange");
@@ -195,16 +203,14 @@ window.addEventListener('load', function() {
     let output = document.getElementById("sliderValue");
 
     // generates names of the .tex
-    const fileNamesArray = getFileNames(actions_obj);
-    console.log(fileNamesArray)
-    indexArr = Array(fileNamesArray.length).fill(0)
-    generateButtons(fileNamesArray);
+    indexArr = Array(filenames_obj.length).fill(0)
+    generateButtons(filenames_obj);
 
     //separate data by .tex
     document.querySelector('#prev').addEventListener("click", function(){
         indexArr[currentIndex] = indexArr[currentIndex] - 1
 
-        if (indexObj[currentTex] - 1 <= 0)
+        if (indexObj[currentTex] -1 < 0)
         {
             alert("This is the start of current file!")
         }
@@ -214,7 +220,7 @@ window.addEventListener('load', function() {
         }
         console.log("Current Index: ", indexObj[currentTex])
 
-        load_frame(separated, organizedData)
+        load_frame()
     })
     document.querySelector('#next').addEventListener("click", function(){
         indexArr[currentIndex] = indexArr[currentIndex] + 1
@@ -230,14 +236,13 @@ window.addEventListener('load', function() {
         }
         console.log("Current Index: ", indexObj[currentTex])
 
-//        slider.value= idx
-        load_frame(separated, organizedData)
+        load_frame()
     })
     document.querySelector('#jump').addEventListener("click", function(){
         let jump = document.getElementById("jumpIndex").value;
         jump = parseInt(jump)
 
-        if (jump >= organizedData[currentTex].length )
+        if (jump >= no_of_doc_file[currentTex])
         {
             alert("Please choose a smaller value!")
         }
@@ -250,34 +255,15 @@ window.addEventListener('load', function() {
             slider.value= indexObj[currentTex]
         }
         console.log("Current Index: ", indexObj[currentTex])
-//        slider.value= idx
-        load_frame(separated, organizedData)
+
+        load_frame()
     })
 
-
-    console.log("here");
-
-    metaBox.innerHTML = separated[currentIndex][0]["file"]+'<br>'+separated[currentIndex][0]["username"]+"<br>"+separated[currentIndex][0]["timestamp"]
-
-    contentBox.innerHTML = revisions_obj[idx]["diff_html"]
-    let lineNums = revisions_obj[idx]["line_nums"]
-    console.log(idx)
-    let index = indexArr[currentIndex]
-    console.log(index)
-
-//    metaBox.innerHTML = separated[currentIndex][0]["file"]+'<br>'+separated[currentIndex][0]["username"]+"<br>"+separated[currentIndex][0]["timestamp"]
-//    contentBox.innerHTML = revisions_obj[index]["diff_html"]
-//    let lineNums = revisions_obj[index]["line_nums"]
-
-    let line_text = ""
-    for (var i=0; i< lineNums.length; i++){
-        line_text = line_text + lineNums[i] + "<br>";
-    }
-    console.log(line_text)
-    lineBox.innerHTML = line_text;
-
-    // Display the initial value
-//    output.innerHTML = slider.value;
+    // set the slider unbound for first displayed file
+    slider.setAttribute('data-slider-max', no_of_doc_file[currentTex] - 1);
+    slider.max = no_of_doc_file[currentTex] - 1;
+    //Render the initial frame once user load the page
+    load_frame()
 
     // Add an onchange event listener to the slider
     slider.oninput = function() {
@@ -287,11 +273,22 @@ window.addEventListener('load', function() {
   // Custom onchange function for slider
   function onChangeFunction(value) {
     let setIndex = parseInt(value)
-    idx = setIndex
-    console.log(idx)
 
     indexObj[currentTex] = setIndex
 
-    load_frame(separated, organizedData)
+    load_frame()
   }
 })
+
+// function that runs before load
+window.onbeforeunload = function () {
+    console.log("Loading Monitor")
+    let body = document.getElementById("body");
+
+    // hides body while loading
+    body.style.display = "none"
+
+    // shows the main loader while loading
+    mainLoader = document.getElementById("mainLoader");
+    mainLoader.style.display = ""
+    }
