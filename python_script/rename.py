@@ -13,7 +13,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
 console = Console()
-client = MongoClient('localhost', 27017)
+client = MongoClient('mongo', 27017)
 db = client.flask_db
 collection = db.activity
 

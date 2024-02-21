@@ -16,7 +16,7 @@ let isLoading = false;
 
 // helper function call by load_frame that fetch edits from server
 async function get_frame(){
- const response = await fetch("http://127.0.0.1:5000" + "/api/monitor", {
+ const response = await fetch("/api/monitorwhole", {
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
@@ -27,6 +27,7 @@ async function get_frame(){
     const message = await response.json();
     return message;
 }
+
 
 // load the frame based on idx
 async function load_frame(){
@@ -201,13 +202,13 @@ window.addEventListener('load', function() {
 
 // function that runs before load
 window.onbeforeunload = function () {
-    console.log("Loading Monitor Whole")
+    console.log("Unloading Loader");
     let body = document.getElementById("body");
 
     // hides body while loading
-    body.style.display = "none"
+    body.style.display = "none";
 
     // shows the main loader while loading
     mainLoader = document.getElementById("mainLoader");
-    mainLoader.style.display = ""
-    }
+    mainLoader.style.display = "";
+}

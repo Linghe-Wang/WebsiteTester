@@ -46,6 +46,7 @@ def index():
 
 @app.route('/api/main', methods=['POST'])
 def process_form():
+    console.log(request.form)
     key, value = next(request.form.items())
     if key == "weekly":
         result = fetch_edits_by_week(value)
@@ -85,6 +86,7 @@ def project():
     data['contributors_json'] = session.get('contributors_json')
     if "project_id" not in session:
         session["project_id"] = next(iter(titles))
+    data['project_id'] = session["project_id"]
     return render_template('project.html', **data)
 
 
@@ -150,24 +152,38 @@ def process_user_form():
 
 @app.route('/monitor', methods=['GET'])
 def monitor():
+    project_id = request.args.get('project_id', default=None)
+    if project_id is not None:
+        session["project_id"] = project_id
+    elif "project_id" not in session:
+        session["project_id"] = next(iter(titles))
+
     data = initialize_admin_data(session.get("project_id"))
+    data['project_id'] = session["project_id"]
     return render_template('monitor.html', **data)
 
 
 @app.route('/monitorwhole/', methods=['GET'])
 def monitor_whole():
+    project_id = request.args.get('project_id', default=None)
+    if project_id is not None:
+        session["project_id"] = project_id
+    elif "project_id" not in session:
+        session["project_id"] = next(iter(titles))
+
     data = initialize_admin_data(session.get("project_id"))
+    data['project_id'] = session["project_id"]
     return render_template('monitorWhole.html', **data)
 
 
-@app.route('/api/monitor', methods=['POST'])
+@app.route('/api/monitorwhole', methods=['POST'])
 def get_500_edit():
     info = request.get_json(force=True)
     data = load_chunk_by_time(session.get("project_id"), info["idx"])
     return jsonify(data)
 
 
-@app.route('/api/monitorwhole', methods=['POST'])
+@app.route('/api/monitor', methods=['POST'])
 def get_500_edit_file():
     info = request.get_json(force=True)
     data = load_chunk_by_file(session.get("project_id"), info["idx"], info["file"])

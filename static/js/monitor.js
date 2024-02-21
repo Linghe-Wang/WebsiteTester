@@ -37,7 +37,7 @@ function generateIndexObj(data) {
 
 // helper function call by load_frame that fetch edits from server
 async function get_frame(){
- const response = await fetch("http://127.0.0.1:5000" + "/api/monitorwhole", {
+ const response = await fetch("/api/monitor", {
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
@@ -282,7 +282,7 @@ window.addEventListener('load', function() {
 
 // function that runs before load
 window.onbeforeunload = function () {
-    console.log("Loading Monitor")
+    console.log("Unloading Loader")
     let body = document.getElementById("body");
 
     // hides body while loading
@@ -291,4 +291,4 @@ window.onbeforeunload = function () {
     // shows the main loader while loading
     mainLoader = document.getElementById("mainLoader");
     mainLoader.style.display = ""
-    }
+}

@@ -11,6 +11,7 @@ import threading
 
 console = Console()
 client = MongoClient('localhost', 27017)
+# client = MongoClient('mongo', 27017)
 db = client.flask_db
 collection = db.activity
 
@@ -38,7 +39,7 @@ def _find_titles():
                     if doc['text'][each.start() - 1] != '%':
                         bracket = 1
                         idx = each.end()
-                        while bracket != 0:
+                        while bracket != 0 and (len(doc['text']) > idx):
                             if doc['text'][idx] == '{':
                                 bracket += 1
                             elif doc['text'][idx] == '}':
@@ -46,13 +47,12 @@ def _find_titles():
                             idx += 1
                         raw_title = doc['text'][each.start():idx] + "\\maketitle"
                         title = LatexNodes2Text().latex_to_text(raw_title).split("\n    ")[0].replace("\n", "")
-                        titles[pid] = title
                         break
-                if title is None:
+                if (title is None) or (title.replace(" ", "") == ""):
                     for each in positions:
                         bracket = 1
                         idx = each.end()
-                        while bracket != 0:
+                        while (bracket != 0) and (len(doc['text']) > idx):
                             if doc['text'][idx] == '{':
                                 bracket += 1
                             elif doc['text'][idx] == '}':
@@ -60,13 +60,13 @@ def _find_titles():
                             idx += 1
                         raw_title = doc['text'][each.start():idx] + "\\maketitle"
                         title = LatexNodes2Text().latex_to_text(raw_title).split("\n    ")[0].replace("\n", "")
-                        titles[pid] = title
                         break
+                if title != "":
+                    titles[pid] = title
                 break
-    timer = threading.Timer(60 * 60, _find_titles)
+    timer = threading.Timer(24* 60 * 60, _find_titles)
     timer.start()
 
 
 titles = {}
 _find_titles()
-console.log(titles)
