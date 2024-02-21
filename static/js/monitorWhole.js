@@ -5,11 +5,18 @@ let globalMax = 499;
 let metaBox;
 let lineBox;
 let contentBox;
+let loadBox;
+let buttonGroupBox
+let mainBox
+let mainLoader
+let organizedData = {};
+console.log(actions_obj)
 console.log(actions_obj[0])
+let isLoading = false;
 
 // helper function call by load_frame that fetch edits from server
 async function get_frame(){
- const response = await fetch("http://127.0.0.1:5000" + "/api/monitor", {
+ const response = await fetch("/api/monitorwhole", {
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
@@ -20,6 +27,7 @@ async function get_frame(){
     const message = await response.json();
     return message;
 }
+
 
 // load the frame based on idx
 async function load_frame(){
@@ -34,9 +42,15 @@ async function load_frame(){
     }
     // render the frame along with metadata
     arrayIdx = idx - globalMin
-    metaBox.innerHTML = actions_obj[arrayIdx]["file"]+'<br>'+actions_obj[arrayIdx]["username"]+"<br>"+actions_obj[arrayIdx]["timestamp"]
+    metaBox.innerHTML = actions_obj[arrayIdx]["file"]+'<br>'+actions_obj[arrayIdx]["username"]+"<br>"+actions_obj[arrayIdx]["timestamp"]+"<br>"+idx
 
     contentBox.innerHTML = revisions_obj[arrayIdx]["diff_html"]
+
+    // hides the loader
+    loadBox.style.display = "none"
+    // shows the button group
+    buttonGroupBox.style.display = ""
+    mainBox.style.display = ""
 
     let lineNums = revisions_obj[arrayIdx]["line_nums"]
     for (var i=0; i< lineNums.length; i++){
@@ -108,6 +122,9 @@ window.addEventListener('load', function() {
     lineBox = document.querySelector('#displayLines');
     contentBox = document.querySelector('#displayContent');
     let slider = document.getElementById("myRange");
+    buttonGroupBox = document.getElementById("buttonGroup");
+    mainBox = document.getElementById("mainContainer");
+    loadBox =document.getElementById("loader");
 
     // Get the output element where the value will be displayed
     let output = document.getElementById("sliderValue");
@@ -167,6 +184,12 @@ window.addEventListener('load', function() {
 
     // Custom onchange function for slider
     function onChangeFunction(value) {
+        // displays the loader
+        loadBox.style.display = ""
+        // hides button group
+        buttonGroupBox.style.display = "none"
+        mainBox.style.display = "none"
+
         let setIndex = parseInt(value)
         idx = setIndex
         console.log(idx)
@@ -176,3 +199,16 @@ window.addEventListener('load', function() {
         })
     }
 })
+
+// function that runs before load
+window.onbeforeunload = function () {
+    console.log("Unloading Loader");
+    let body = document.getElementById("body");
+
+    // hides body while loading
+    body.style.display = "none";
+
+    // shows the main loader while loading
+    mainLoader = document.getElementById("mainLoader");
+    mainLoader.style.display = "";
+}

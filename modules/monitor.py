@@ -54,7 +54,9 @@ Returns:
 
 
 def initialize_admin_data(projectID):
+    console.log(projectID)
     query = {'project': projectID,
+             "file": {"$exists": True},
             "message": {"$exists": True, "$ne": "assist"},
             "state": {"$exists": True, "$ne": "user_selection"},
             'revision': {"$exists": True, "$ne": []},
@@ -65,7 +67,7 @@ def initialize_admin_data(projectID):
     data = collection.find(query).sort("timestamp", 1).skip(0).limit(500)
 
     filenames = collection.distinct("file", query)
-
+    console.log(filenames)
     no_of_doc = collection.count_documents(query)
 
     no_of_doc_file = {}
@@ -84,7 +86,18 @@ def initialize_admin_data(projectID):
     for each in data:
         timestamp = datetime.fromtimestamp(each["timestamp"]/1000).strftime('%Y-%m-%d %H:%M:%S')
         actions.append({"file": each["file"], "username": each['username'], "timestamp": timestamp})
-        revisions.append({"line_nums": each["editingLines"], "diff_html": diff_prettyHtml(each["revision"])})
+        if len(each["revision"]) < 6:
+            revisions.append({"line_nums": each["editingLines"], "diff_html": diff_prettyHtml(each["revision"])})
+        else:
+            before, after = [], []
+            for section in each["revision"]:
+                if section[0] == 0 or section[0] == -1:
+                    before.append(section)
+                if section[0]== 0 or section[0] == 1:
+                    after.append(section)
+            actions.append({"file": each["file"], "username": each['username'], "timestamp": timestamp})
+            revisions.append({"line_nums": each["editingLines"], "diff_html": diff_prettyHtml(before)})
+            revisions.append({"line_nums": each["editingLines"], "diff_html": diff_prettyHtml(after)})
 
     # "actions" contains filename, username, and time for each frame
     # "revisions" contains line number and difference HTML(HTML for text reconstruction)
@@ -99,6 +112,7 @@ def load_chunk_by_time(projectID, skip):
         skip = 0
 
     data = collection.find({'project': projectID,
+                            "file": {"$exists": True},
                             "message": {"$exists": True, "$ne": "assist"},
                             "state": {"$exists": True, "$ne": "user_selection"},
                             'revision': {"$exists": True, "$ne": []},

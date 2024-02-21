@@ -9,6 +9,7 @@ app = Flask(__name__)
 
 app.secret_key = 'qearvgb12345413pibergefwva'
 
+
 def get_default_date():
     current_date = datetime.now()
     year, current_week = current_date.isocalendar()[:2]
@@ -23,6 +24,7 @@ def get_default_date():
     data = {'maxweek': default_week, 'maxmonth': default_month}
 
     return data
+
 
 @app.route('/favicon.ico')
 def favicon():
@@ -44,6 +46,7 @@ def index():
 
 @app.route('/api/main', methods=['POST'])
 def process_form():
+    console.log(request.form)
     key, value = next(request.form.items())
     if key == "weekly":
         result = fetch_edits_by_week(value)
@@ -51,7 +54,7 @@ def process_form():
         result = fetch_edits_by_month(value)
     elif key == "annually":
         result = fetch_edits_by_year(value)
-        
+
     overview_data = plot_stack_chart(result['edits_each_date'])
     top_projects_data = plot_stack_chart(result['top_n_projects'])
     top_users_data = plot_stack_chart(result['top_n_users'])
@@ -61,8 +64,9 @@ def process_form():
     session['overview_json'] = overview_json
     session['top_projects_json'] = top_projects_json
     session['top_users_json'] = top_users_json
-    
+
     return redirect('/main')
+
 
 @app.route('/progress', methods=['GET'])
 def progress():
@@ -82,7 +86,9 @@ def project():
     data['contributors_json'] = session.get('contributors_json')
     if "project_id" not in session:
         session["project_id"] = next(iter(titles))
+    data['project_id'] = session["project_id"]
     return render_template('project.html', **data)
+
 
 @app.route('/api/project', methods=['POST'])
 def process_project_form():
@@ -109,6 +115,7 @@ def process_project_form():
 
     return redirect('/project')
 
+
 @app.route('/user', methods=['GET'])
 def user():
     all_uids = distinct_usernames()
@@ -117,6 +124,7 @@ def user():
     data['user_json'] = session.get('user_json')
     data['contributions_json'] = session.get('contributions_json')
     return render_template('user.html', **data)
+
 
 @app.route('/api/user', methods=['POST'])
 def process_user_form():
@@ -144,24 +152,38 @@ def process_user_form():
 
 @app.route('/monitor', methods=['GET'])
 def monitor():
+    project_id = request.args.get('project_id', default=None)
+    if project_id is not None:
+        session["project_id"] = project_id
+    elif "project_id" not in session:
+        session["project_id"] = next(iter(titles))
+
     data = initialize_admin_data(session.get("project_id"))
+    data['project_id'] = session["project_id"]
     return render_template('monitor.html', **data)
 
 
 @app.route('/monitorwhole/', methods=['GET'])
 def monitor_whole():
+    project_id = request.args.get('project_id', default=None)
+    if project_id is not None:
+        session["project_id"] = project_id
+    elif "project_id" not in session:
+        session["project_id"] = next(iter(titles))
+
     data = initialize_admin_data(session.get("project_id"))
+    data['project_id'] = session["project_id"]
     return render_template('monitorWhole.html', **data)
 
 
-@app.route('/api/monitor', methods=['POST'])
+@app.route('/api/monitorwhole', methods=['POST'])
 def get_500_edit():
     info = request.get_json(force=True)
     data = load_chunk_by_time(session.get("project_id"), info["idx"])
     return jsonify(data)
 
 
-@app.route('/api/monitorwhole', methods=['POST'])
+@app.route('/api/monitor', methods=['POST'])
 def get_500_edit_file():
     info = request.get_json(force=True)
     data = load_chunk_by_file(session.get("project_id"), info["idx"], info["file"])
