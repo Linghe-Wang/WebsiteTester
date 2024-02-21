@@ -17,66 +17,75 @@
       <script src="{{ url_for('static', filename='js/monitorWhole.js') }}"></script>
    </head>
    <body >
-      <div id="mainLoader" style="display: none; margin: auto; margin-top: 40vh" ></div>
-      <div id="body" style="margin: 3vh">
-         <div style="display: flex; flex-direction: row; align-items: center; margin-bottom: 2vh">
-            <h4>Project ID: </h4>
-            <!--    <div>abcdef00 </div>-->
-         </div>
-         <form >
-            <div style="display: flex; flex-direction: row; align-items: center; gap: 1vw">
-               <label for="jump">Jump To:</label>
-               <input type="text" id="jumpIndex" name="jump" ><br><br>
-               <button id="jump" type="button" class="btn btn-primary">Jump!</button>
-               <div style="flex:1"></div>
-               <div class="btn-group rounded" role="group" aria-label="Basic group for mode" style="">
-                  <input type="radio" class="btn-check" name="btnMode" id="byFiles" autocomplete="off" >
-                  <label class=" btn btn-outline-primary" for="byFiles">
-                  <a style="text-decoration:none; " href="/monitor"> By Files</a>
-                  </label>
-                  <input type="radio" class="btn-check" name="btnMode" id="byTime" autocomplete="off" checked>
-                  <label class=" btn btn-outline-primary" for="byTime">By Time</label>
+      <div id="mainLoader"  style="display: none; margin: auto; margin-top: 40vh" ></div>
+      <div id="body" class="mt-3">
+         <div class="d-flex flex-row"  style=" gap: 2vw">
+            <!--// left side-->
+            <div style="width: 40vw">
+               <div class="d-flex flex-row align-items-center mb-3 mt-3" >
+                  <h4>Project ID: </h4>
                </div>
-            </div>
-            <div style="display: flex; flex-direction: row; align-items: center; justify-content: center; margin-top: 5vh; gap:2vw">
+               <form >
+               <div class="d-flex flex-row align-items-center" style="gap: 1vw">
+                  <label for="jump">Jump To:</label>
+                  <input type="text" id="jumpIndex" name="jump" ><br><br>
+                  <button id="jump" type="button" class="btn btn-primary">Jump!</button>
+                  <div style="flex:1"></div>
+               </div>
+               <div class="d-flex flex-row align-items-center mt-4 mb-5"style="gap:1vw;">
+                  <div >
+                     <div>Select Mode: </div>
+                  </div>
+                  <div class="btn-group rounded" role="group" aria-label="Basic group for mode">
+                     <input type="radio" class="btn-check" name="btnMode" id="byFiles" autocomplete="off" >
+                        <label class=" btn btn-outline-primary" for="byFiles">
+                           <a style="text-decoration:none; " href="/monitor"> By Files</a>
+                        </label>
+                     <input type="radio" class="btn-check" name="btnMode" id="byTime" autocomplete="off" checked>
+                     <label class=" btn btn-outline-primary" for="byTime">By Time</label>
+                  </div>
+               </div>
+            <div class="d-flex flex-row align-items-center justify-content-start mt-5" style="gap:2vw">
                <i id = "prev" class="bi bi-arrow-left-circle-fill h1"></i>
-               <input type="range" class="form-range" id="myRange" data-slider-id='ex1Slider' max= {{ no_of_doc - 1 }} value="0" style="width:60vw"
+               <input type="range" class="form-range" id="myRange" data-slider-id='ex1Slider' max= {{ no_of_doc - 1 }} value="0" style="width:30vw"
                data-bs-toggle="tooltip" data-bs-placement="top"
                data-bs-custom-class="custom-tooltip"
                data-bs-title="Value: 4">
                <i id="next" class="bi bi-arrow-right-circle-fill h1"></i>
 
             </div>
-            <div style="display: flex; justify-content: center; gap: 1vw; margin-top: 2vh">
-               <div id= "info" style="display: flex; flex-direction: column; align-items: center; justify-content: center; ">
+            <div class="d-flex justify-content-center mt-2" style="ap: 1vw;">
+               <div id= "info" class="d-flex flex-column justify-content-center align-items-center mt-3">
                   <div id="file" style="font-weight: 700"> File: </div>
                   <div id="userName" style="font-weight: 700"> Username: </div>
                   <div id="timeStamp" style="font-weight: 700"> Timestamp: </div>
                   <div id="currentIdx" style="font-weight: 700"> Index: </div>
                </div>
-               <div id="control" style="display: flex; flex-direction: column; align-items: center; justify-content: center; ">
+               <div id="control" class="mt-3 d-flex flex-column align-items-center justify-content-center">
                   <div id="meta"></div>
                </div>
             </div>
-
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 5vh ">
+               </form>
+            </div>
+<!--            right side-->
+            <div style="width: 40vw">
+               <div class="d-flex flex-column align-items-center justify-content-center mt-3" >
                <div id="loader" class="loader" style="margin-top: 20vh" ></div>
-               <div id="buttonGroup" class="" style="width: 65vw" >
+               <div id="buttonGroup" class="" style="width: 40vw" >
                   <div class="btn-group fileButtons rounded" role="group" aria-label="Basic radio toggle button group" style="display: flex; flex-direction: row; flex-wrap: wrap;">
                      <div style="flex:1"></div>
                   </div>
                </div>
-               <div id="mainContainer" >
+               <div id="mainContainer" style="width: 40vw" >
                   <div id="displayLines" ></div>
-
-                  <div id="displayContent" class="displayContent"  >
-
+                  <div id="displayContent" class="displayContent" style="overflow:scroll; height: 85vh"  >
                      "The beginning of edits"
                   </div>
-
                </div>
             </div>
-         </form>
+               </div>
+         </div>
+      </div>
       </div>
    </body>
 </html>
