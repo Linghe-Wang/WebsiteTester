@@ -191,4 +191,4 @@ def get_500_edit_file():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=3475)

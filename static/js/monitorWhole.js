@@ -198,21 +198,6 @@ window.addEventListener('load', function() {
             generateButtons(fileNamesArray);
         })
     }
-
-    // detect keyboard press for moving index
-    window.addEventListener("keydown", (event) => {
-        // right arrow
-        if (event.isComposing || event.keyCode === 39) {
-            console.log("Right arrow pressed")
-            idx = idx + 1
-            load_frame()
-        }
-        else if (event.isComposing || event.keyCode === 37) {
-            console.log("Left arrow pressed")
-            idx = idx - 1
-            load_frame()
-        }
-    });
 })
 
 // function that runs before load
@@ -227,4 +212,3 @@ window.onbeforeunload = function () {
     mainLoader = document.getElementById("mainLoader");
     mainLoader.style.display = "";
 }
-
