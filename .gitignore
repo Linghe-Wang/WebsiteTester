@@ -1,4 +1,6 @@
 .idea/
-__pycache__
+__pycache__/
+projects/
+test*
 /venv
-python_script/token.json
+python_script/

@@ -21,13 +21,15 @@
             <a href="/main">Overview</a>
             <a href="/project">Project</a>
             <a href="/user">User</a>
+            <a href="/sankey">Sankey</a>
+            <a href="/visual">Visual</a>
         </nav>
         <form action="/api/main" method="POST">
-            <input type="week" id="weekly" name="weekly" min="2023-W01" max={{ maxweek }}>
+            <input type="week" id="weekly" name="weekly" min={{ minweek }} max={{ maxweek }}>
             <input type="submit" value="Apply">
         </form>
         <form action="/api/main" method="POST">
-            <input type="month" id="monthly" name="monthly" min="2023-01" max={{ maxmonth }}>
+            <input type="month" id="monthly" name="monthly" min={{ minmonth }} max={{ maxmonth }}>
             <input type="submit" value="Apply">
         </form>
         <form action="/api/main" method="POST">

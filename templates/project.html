@@ -20,6 +20,8 @@
             <a href="/main">Overview</a>
             <a href="/project">Project</a>
             <a href="/user">User</a>
+            <a href="/sankey">Sankey</a>
+            <a href="/visual">Visual</a>
         </nav>
         <form action="/api/project" method="POST">
             <select name="projectid" id="projectid">
@@ -27,9 +29,9 @@
                     <option value="{{ pid }}">{{ all_pids[pid] }}</option>
                 {% endfor %}
             </select>
-            <input type="week" id="weekly" name="week" min="2023-W01" max={{ maxweek }}>
+            <input type="week" id="weekly" name="weekly" min={{ minweek }} max={{ maxweek }}>
             <input type="submit" name="interval" value="weekly">
-            <input type="month" id="monthly" name="month" min="2023-01" max={{ maxmonth }}>
+            <input type="month" id="monthly" name="monthly" min={{ minmonth }} max={{ maxmonth }}>
             <input type="submit" name="interval" value="monthly">
             <select name="year" id="year">
                 <option value="2023-01-01">2023</option>
@@ -37,7 +39,6 @@
             </select>
             <input type="submit" name="interval" value="annually">
         </form>
-        <button> <a style="text-decoration:none; color: black" href="/monitor" id="trajBtn">View Trajectory</a> </button>
         <h2>Project Summary</h2>
         <canvas id="verticalChart" width="400" height="200" ></canvas>
         <div id="projectLoader" class="loader" style="display: none; margin:auto; margin-top:10vh; margin-bottom:10vh"></div>

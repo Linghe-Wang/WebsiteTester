@@ -4,6 +4,4 @@ rich
 pylatexenc
 python-dateutil
 diff_match_patch
-google-api-python-client
-google-auth-httplib2
-google-auth-oauthlib
+plotly==5.22.0

@@ -10,10 +10,11 @@ from pylatexenc.latex2text import LatexNodes2Text
 import threading
 
 console = Console()
-client = MongoClient('localhost', 27017)
-# client = MongoClient('mongo', 27017)
+# client = MongoClient('localhost', 27017)
+client = MongoClient('mongo', 27017)
 db = client.flask_db
-collection = db.activity
+collection = db.visual_data
+annotation = db.annotation
 
 # Maybe not needed for admin page.
 user_data = db["user_data"]
